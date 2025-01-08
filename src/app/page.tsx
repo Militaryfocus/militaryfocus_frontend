@@ -1,6 +1,9 @@
+"use client"
 import ContainerDefault from '@/components/Containers/ContainerDefault'
 import NewsCard from "@/components/News/NewsCard"
 import SmallNewsCard from "@/components/News/SmallNewsCard"
+import Pagination from '@/components/Pagination/Pagination'
+import { useState } from 'react'
 
 import newsImg1 from "@/assets/img/news-img-1.jpg"
 import newsImg2 from "@/assets/img/news-img-2.jpg"
@@ -70,6 +73,13 @@ const smallNewsData = [
 ]
 
 export default function Home() {
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    // Bu yerda API call qilib, yangi ma'lumotlarni olish mumkin
+  }
+
   return (
     <main className="pt-[33px] pb-[100px]">
       <ContainerDefault>
@@ -99,6 +109,12 @@ export default function Home() {
             <SmallNewsCard key={news.id} news={news} />
           ))}
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={254}
+          onPageChange={handlePageChange}
+        />
       </ContainerDefault>
     </main>
   )
