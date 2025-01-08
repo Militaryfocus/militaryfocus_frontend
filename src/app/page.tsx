@@ -71,7 +71,7 @@ const smallNewsData = [
 
 export default function Home() {
   return (
-    <main className="py-8">
+    <main className="pt-[33px] pb-[100px]">
       <ContainerDefault>
         <div className="mb-[100px]">
           <div className="flex items-center gap-2 text-white mb-[20px]">
