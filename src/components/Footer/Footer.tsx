@@ -5,28 +5,28 @@ import ContainerDefault from '../Containers/ContainerDefault'
 // Import Img
 import Logo from '@/assets/svg/logo.svg'
 import { NavContent } from '../Header/Nav'
+import MobileFooter from './MobileFooter'
 
 const Footer = () => {
     return (
-        <footer className="bg-[#0F100B] pt-[40px] pb-[48px]">
+        <footer className="bg-[#0F100B] pt-[40px] pb-[48px] max-[425px]:pt-[30px] max-[425px]:pb-[35px]">
             <ContainerDefault>
-                <div className="flex justify-between items-start">
+                {/* Desktop Footer */}
+                <div className="hidden lg:flex justify-between items-start">
                     <Link href="/">
                         <Image src={Logo} className='object-cover' alt="logo" width={110} height={40} />
                     </Link>
 
                     <ul className="flex flex-col gap-[20px]">
-                        {
-                            NavContent.map((item, index) => (
-                                <li key={index}>
-                                    <Link href={item.href} className='text-[#fff] text-[16px] font-normal leading-[21px]'>{item.title}</Link>
-                                </li>
-                            ))
-                        }
+                        {NavContent.map((item, index) => (
+                            <li key={index}>
+                                <Link href={item.href} className='text-[#fff] text-[16px] font-normal leading-[21px]'>{item.title}</Link>
+                            </li>
+                        ))}
                     </ul>
 
                     <div className="flex flex-col gap-[20px]">
-                        <Link href="/" className='text-[#fff] text-[16px] font-normal leading-[21px]'>Пользовательское соглашение </Link>
+                        <Link href="/" className='text-[#fff] text-[16px] font-normal leading-[21px]'>Пользовательское соглашение</Link>
                         <Link href="/" className='text-[#fff] text-[16px] font-normal leading-[21px]'>Политика конфиденциальности</Link>
                     </div>
 
@@ -35,6 +35,11 @@ const Footer = () => {
                             Регистрационный номер СМИ ЭЛ № ФС??-?????, выдано ??.??.20?? г. Федеральной службой по надзору в сфере связи, информационных технологий и массовых коммуникаций (Роскомнадзор)
                         </p>
                     </div>
+                </div>
+
+                {/* Mobile/Tablet Footer */}
+                <div className="lg:hidden">
+                    <MobileFooter />
                 </div>
             </ContainerDefault>
         </footer>

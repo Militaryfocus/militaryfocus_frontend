@@ -1,13 +1,13 @@
 "use client"
-import ContainerDefault from '@/components/Containers/ContainerDefault'
-import NewsCard from "@/components/News/NewsCard"
-import SmallNewsCard from "@/components/News/SmallNewsCard"
-import Pagination from '@/components/Pagination/Pagination'
 import { useState } from 'react'
 
 import newsImg1 from "@/assets/img/news-img-1.jpg"
 import newsImg2 from "@/assets/img/news-img-2.jpg"
 import newsImg3 from "@/assets/img/news-img-3.jpg"
+import ContainerDefault from '@/components/Containers/ContainerDefault'
+import NewsCard from '@/components/News/NewsCard'
+import SmallNewsCard from '@/components/News/SmallNewsCard'
+import Pagination from '@/components/Pagination/Pagination'
 import Link from 'next/link'
 
 const newsData = [
@@ -77,14 +77,13 @@ export default function Home() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    // Bu yerda API call qilib, yangi ma'lumotlarni olish mumkin
   }
 
   return (
-    <main className="pt-[33px] pb-[100px]">
+    <main className="pt-[33px] pb-[100px] max-[425px]:pt-[60px] max-[425px]:pb-[80px]">
       <ContainerDefault>
-        <div className="mb-[100px]">
-          <div className="flex items-center gap-2 text-white mb-[20px]">
+        <div className="mb-[100px] max-[425px]:mb-[60px]">
+          <div className="flex items-center gap-2 text-white mb-[20px] max-[425px]:hidden">
             <Link href="/" className="hover:text-yellow-500">Главная</Link>
             <span>/</span>
             <Link href="/news" className="hover:text-yellow-500">Новости</Link>
@@ -92,19 +91,19 @@ export default function Home() {
             <span className='text-white'>Статья</span>
           </div>
 
-          <h1 className="text-[64px] font-russo-one text-white mb-[20px]">Новости</h1>
-          <p className="text-white text-[24px] font-semibold font-open-sans max-w-[770px]">
+          <h1 className="text-[32px] md:text-[64px] max-[425px]:text-[24px] font-russo-one text-white mb-[16px] md:mb-[20px]">Новости</h1>
+          <p className="text-white text-[16px] md:text-[24px] max-[425px]:text-[14px] font-semibold font-open-sans max-w-[770px]">
             Узнайте о последних разработках, вооружении и операциях, влияющих на мировую безопасность
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-[60px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mb-[40px] md:mb-[60px] max-[425px]:gap-[20px] max-[425px]:mb-[20px]">
           {newsData.map(news => (
             <NewsCard key={news.id} news={news} />
           ))}
         </div>
 
-        <div className="grid grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 max-[425px]:grid-cols-1 max-[425px]:gap-[20px]">
           {smallNewsData.map(news => (
             <SmallNewsCard key={news.id} news={news} />
           ))}
