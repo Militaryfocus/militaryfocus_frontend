@@ -80,7 +80,7 @@ export default function Home() {
   }
 
   return (
-    <main className="pt-[33px] pb-[100px] max-[425px]:pt-[60px] max-[425px]:pb-[80px]">
+    <main className="pt-[33px] pb-[100px] max-[425px]:pt-[30px] max-[425px]:pb-[80px]">
       <ContainerDefault>
         <div className="mb-[100px] max-[425px]:mb-[60px]">
           <div className="flex items-center gap-2 text-white mb-[20px] max-[425px]:hidden">

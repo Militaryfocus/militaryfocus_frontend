@@ -14,7 +14,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     const visiblePages = Array.from({ length: 5 }, (_, i) => i + 1)
 
     return (
-        <div className="flex items-center justify-center gap-[8px] mt-[60px] bg-[#262F0D] py-[16px] relative">
+        <div className="flex items-center justify-center gap-[8px] mt-[60px] bg-[#262F0D] py-[16px] relative max-[550px]:px-[40px]">
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
