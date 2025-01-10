@@ -17,7 +17,7 @@ export default function NewsCard({ news }: NewsCardProps) {
                 <div className="relative h-[180px] md:h-[300px] max-[425px]:h-[220px] max-[425px]:w-full max-[425px]:mx-auto overflow-hidden rounded-[4px] ">
                     <Image
                         src={news.image}
-                        alt={news.title}
+                        alt={`Фото: ${news.title} - новости СВО 2025`}
                         fill
                         className="object-cover transition-transform group-hover:scale-105"
                     />

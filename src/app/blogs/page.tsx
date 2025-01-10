@@ -4,7 +4,6 @@ import CategoryTitle from '@/components/Category/CategoryTitle'
 import ContainerDefault from '@/components/Containers/ContainerDefault'
 import NewsCard from '@/components/News/NewsCard'
 import SmallNewsCard from '@/components/News/SmallNewsCard'
-import { useState } from 'react'
 
 // Import data
 import LinkCard from '@/components/LinkCard/LinkCard'
@@ -12,12 +11,6 @@ import BigNewsCard from '@/components/News/BigNewsCard'
 import { analyticsData, historyData, newsData, technologiesData, weaponsData } from '@/data/news.data'
 
 export default function Blogs() {
-    const [currentPage, setCurrentPage] = useState(1)
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page)
-    }
-
     return (
         <main className="pt-[0px] pb-[100px] max-[425px]:pb-[80px]">
             <Banner />

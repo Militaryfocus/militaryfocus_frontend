@@ -91,7 +91,7 @@ export default function Home() {
             <span className='text-white'>Статья</span>
           </div>
 
-          <h1 className="text-[32px] md:text-[64px] max-[425px]:text-[24px] font-russo-one text-white mb-[16px] md:mb-[20px]">Новости</h1>
+          <h1 className="text-[32px] md:text-[64px] max-[425px]:text-[24px] font-russo-one text-white mb-[16px] md:mb-[20px] max-[425px]:mb-[0px]">Новости</h1>
           <p className="text-white text-[16px] md:text-[24px] max-[425px]:text-[14px] font-semibold font-open-sans max-w-[770px]">
             Узнайте о последних разработках, вооружении и операциях, влияющих на мировую безопасность
           </p>

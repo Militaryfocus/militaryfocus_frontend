@@ -27,7 +27,7 @@ export default function BigNewsCard({ news }: BigNewsCardProps) {
 
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-[40px] max-[425px]:p-[20px]">
-                    <h1 className="text-white text-[24px] leading-tight mb-[20px] max-[1024px]:text-[32px] max-[425px]:text-[24px] max-[425px]:mb-[10px] group-hover:text-yellow-500 transition-colors">
+                    <h1 className="text-white text-[24px] leading-tight mb-[20px] max-[1024px]:text-[32px] max-[425px]:text-[18px] max-[425px]:mb-[10px] group-hover:text-yellow-500 transition-colors">
                         {news.title}
                     </h1>
 

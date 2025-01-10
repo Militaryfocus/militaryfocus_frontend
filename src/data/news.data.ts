@@ -7,7 +7,8 @@ export const newsData = [
 		views: 12122,
 		comments: 22,
 		date: '21.12.2024',
-		image: newsImg1,
+		image:
+			'https://images.unsplash.com/photo-1544552866-d3ed42536cfd?q=80&w=1470&auto=format&fit=crop',
 	},
 	{
 		id: 2,
@@ -15,7 +16,8 @@ export const newsData = [
 		views: 12122,
 		comments: 22,
 		date: '21.12.2024',
-		image: newsImg1,
+		image:
+			'https://images.unsplash.com/photo-1580424917967-a8867a6e676e?q=80&w=1470&auto=format&fit=crop',
 	},
 	{
 		id: 3,
@@ -180,7 +182,8 @@ export const weaponsData = [
 		views: 12122,
 		comments: 22,
 		date: '21.12.2024',
-		image: newsImg1,
+		image:
+			'https://images.unsplash.com/photo-1563900905574-8674edd8d156?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
 	},
 	{
 		id: 2,
@@ -188,10 +191,27 @@ export const weaponsData = [
 		views: 12122,
 		comments: 22,
 		date: '21.12.2024',
-		image: newsImg1,
+		image:
+			'https://images.unsplash.com/photo-1544290738-426284cd2550?q=80&w=2942&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
 	},
 	{
 		id: 3,
+		title: 'Долгий путь на поле боя: активные стрелковые наушники',
+		views: 12122,
+		comments: 22,
+		date: '21.12.2024',
+		image: newsImg1,
+	},
+	{
+		id: 4,
+		title: 'Долгий путь на поле боя: активные стрелковые наушники',
+		views: 12122,
+		comments: 22,
+		date: '21.12.2024',
+		image: newsImg1,
+	},
+	{
+		id: 5,
 		title: 'Долгий путь на поле боя: активные стрелковые наушники',
 		views: 12122,
 		comments: 22,
@@ -209,7 +229,8 @@ export const analyticsData = [
 		views: 12122,
 		comments: 22,
 		date: '21.12.2024',
-		image: newsImg1,
+		image:
+			'https://images.unsplash.com/photo-1542451542907-6cf80ff362d6?q=80&w=1471&auto=format&fit=crop',
 	},
 	{
 		id: 2,
