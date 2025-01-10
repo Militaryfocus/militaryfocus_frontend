@@ -4,6 +4,7 @@ import { useState } from 'react'
 import newsImg1 from "@/assets/img/news-img-1.jpg"
 import newsImg2 from "@/assets/img/news-img-2.jpg"
 import newsImg3 from "@/assets/img/news-img-3.jpg"
+import Banner from '@/components/Banner/Banner'
 import ContainerDefault from '@/components/Containers/ContainerDefault'
 import NewsCard from '@/components/News/NewsCard'
 import SmallNewsCard from '@/components/News/SmallNewsCard'
@@ -80,9 +81,10 @@ export default function Home() {
   }
 
   return (
-    <main className="pt-[33px] pb-[100px] max-[425px]:pt-[30px] max-[425px]:pb-[80px]">
+    <main className="pb-[100px] max-[425px]:pb-[80px]">
+      <Banner title="Новости СВО" description="Последние новости СВО за 2025 год" />
       <ContainerDefault>
-        <div className="mb-[100px] max-[425px]:mb-[60px]">
+        <div className="mb-[40px] max-[425px]:mb-[60px]">
           <div className="flex items-center gap-2 text-white mb-[20px] max-[425px]:hidden">
             <Link href="/" className="hover:text-yellow-500">Главная</Link>
             <span>/</span>
@@ -90,11 +92,6 @@ export default function Home() {
             <span>/</span>
             <span className='text-white'>Статья</span>
           </div>
-
-          <h1 className="text-[32px] md:text-[64px] max-[425px]:text-[24px] font-russo-one text-white mb-[16px] md:mb-[20px] max-[425px]:mb-[0px]">Новости</h1>
-          <p className="text-white text-[16px] md:text-[24px] max-[425px]:text-[14px] font-semibold font-open-sans max-w-[770px]">
-            Узнайте о последних разработках, вооружении и операциях, влияющих на мировую безопасность
-          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mb-[40px] md:mb-[60px] max-[425px]:gap-[20px] max-[425px]:mb-[20px]">

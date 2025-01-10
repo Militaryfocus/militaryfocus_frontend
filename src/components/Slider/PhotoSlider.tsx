@@ -15,7 +15,7 @@ export default function PhotoSlider({ photos }: PhotoSliderProps) {
     const [indicatorPosition, setIndicatorPosition] = useState(0)
     const [isDragging, setIsDragging] = useState(false)
     const [startX, setStartX] = useState(0)
-    const containerWidth = 300 // indicator container width
+    const containerWidth = 260 // indicator container width
     const indicatorWidth = 50 // indicator width
     const maxScroll = containerWidth - indicatorWidth
 
@@ -90,13 +90,21 @@ export default function PhotoSlider({ photos }: PhotoSliderProps) {
             <div className="relative">
                 <div
                     ref={scrollRef}
-                    className="flex gap-5 overflow-x-auto scrollbar-hide mx-auto"
+                    className="flex gap-5 overflow-hidden mx-auto"
                     style={{
                         width: '100vw',
                         paddingLeft: 'calc((100vw - 1440px) / 2 + 16px)',
-                        paddingRight: '120px'
+                        paddingRight: '120px',
+                        WebkitOverflowScrolling: 'touch',
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none'
                     }}
                 >
+                    <style jsx>{`
+                        div::-webkit-scrollbar {
+                            display: none;
+                        }
+                    `}</style>
                     {photos.map((photo, index) => (
                         <div
                             key={index}
@@ -147,7 +155,7 @@ export default function PhotoSlider({ photos }: PhotoSliderProps) {
                 </div>
 
                 {/* Slider Indicator - Mobile */}
-                <div className="md:hidden absolute bottom-[-20px] left-1/2 transform -translate-x-1/2 w-[300px] max-[425px]:w-[275px] h-[8px] bg-[#262F0D] rounded-full">
+                <div className="md:hidden absolute bottom-[-20px] left-1/2 transform -translate-x-1/2 w-[260px] h-[8px] bg-[#262F0D] rounded-full">
                     <div
                         className="absolute top-0 left-0 w-[50px] h-full bg-[#ED9215] rounded-full transition-all duration-300 cursor-pointer"
                         style={{ transform: `translateX(${indicatorPosition}px)` }}
