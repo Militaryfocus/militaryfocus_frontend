@@ -27,7 +27,6 @@ export default function RootLayout({
       </head>
       <body
         className={`${russoOne.variable} ${openSans.variable} antialiased`}
-        style={{ touchAction: 'none' }}
       >
         <Wide>
           <Header />
