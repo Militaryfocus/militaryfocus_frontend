@@ -1,7 +1,8 @@
+"use client"
 import Wide from '@/components/Containers/Wide'
+import DisableZoom from '@/components/DisableZoom/DisableZoom'
 import Footer from '@/components/Footer/Footer'
 import Header from '@/components/Header/Header'
-import type { Metadata } from "next"
 import { Open_Sans, Russo_One } from "next/font/google"
 import "./globals.css"
 
@@ -16,23 +17,6 @@ const openSans = Open_Sans({
   subsets: ["latin"],
 })
 
-export const metadata: Metadata = {
-  title: "СВО: новости, аналитика и хроника специальной военной операции 2025",
-  description: "Следите за хроникой событий СВО от непосредственного участника! Новости, аналитика и личный опыт — только проверенная информация из первых рук.",
-  keywords: "СВО, новости, аналитика, хроника, специальная военная операция, военные новости 2025, события на фронте",
-  icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.png', type: 'image/png' }
-    ],
-  },
-  openGraph: {
-    title: "СВО: новости, аналитика и хроника специальной военной операции 2025",
-    description: "Следите за хроникой событий СВО от непосредственного участника! Новости, аналитика и личный опыт — только проверенная информация из первых рук.",
-    images: ['/og-image.jpg'],
-  },
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,12 +24,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+      </head>
       <body
         className={`${russoOne.variable} ${openSans.variable} antialiased`}
+        style={{ touchAction: 'none' }}
       >
+        <DisableZoom />
         <Wide>
           <Header />
-
           {children}
           <Footer />
         </Wide>
