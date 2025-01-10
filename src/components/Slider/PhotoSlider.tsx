@@ -90,7 +90,7 @@ export default function PhotoSlider({ photos }: PhotoSliderProps) {
             <div className="relative">
                 <div
                     ref={scrollRef}
-                    className="flex gap-5 overflow-hidden mx-auto"
+                    className="flex gap-5 overflow-hidden mx-auto max-[550px]:overflow-x-scroll"
                     style={{
                         width: '100vw',
                         paddingLeft: 'calc((100vw - 1440px) / 2 + 16px)',
