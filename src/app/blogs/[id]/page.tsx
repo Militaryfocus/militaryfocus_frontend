@@ -1,4 +1,3 @@
-"use client"
 import ContainerDefault from '@/components/Containers/ContainerDefault'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -193,4 +192,14 @@ export default function BlogInner() {
             </ContainerDefault>
         </main>
     )
-} 
+}
+
+export const metadata = {
+    title: 'Новости СВО | Статья',
+    description: 'Актуальные новости СВО, хроника событий, аналитика и экспертные мнения. Следите за развитием специальной военной операции.',
+    openGraph: {
+        title: 'Новости СВО | Статья',
+        description: 'Актуальные новости СВО, хроника событий, аналитика и экспертные мнения.',
+        images: ['/banner.jpg'],
+    }
+}
