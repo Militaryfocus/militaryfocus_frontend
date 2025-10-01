@@ -1,23 +1,34 @@
-// Service Worker для офлайн режима
-const CACHE_NAME = 'military-focus-v1';
-const STATIC_CACHE_NAME = 'military-focus-static-v1';
+// Service Worker для офлайн режима Military Focus
+const CACHE_NAME = 'military-focus-v2';
+const STATIC_CACHE_NAME = 'military-focus-static-v2';
+const IMAGE_CACHE_NAME = 'military-focus-images-v2';
 
 // Файлы для кэширования
 const STATIC_FILES = [
   '/',
   '/offline.html',
   '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/favicon.png',
 ];
 
 // API endpoints для кэширования
 const API_CACHE_PATTERNS = [
   /\/api\/feed/,
   /\/api\/articles/,
+  /militaryfocus\.ru\/api/,
 ];
+
+// Максимальный размер кэша (в байтах)
+const MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
+
+// Время жизни кэша (в миллисекундах)
+const CACHE_EXPIRY_TIME = 24 * 60 * 60 * 1000; // 24 часа
 
 // Установка Service Worker
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+  console.log('Service Worker: Installing v2...');
   
   event.waitUntil(
     Promise.all([
@@ -26,6 +37,8 @@ self.addEventListener('install', (event) => {
         console.log('Service Worker: Caching static files');
         return cache.addAll(STATIC_FILES);
       }),
+      // Предварительно кэшируем важные ресурсы
+      precacheImportantResources(),
       // Пропускаем ожидание активации
       self.skipWaiting(),
     ])
@@ -34,7 +47,7 @@ self.addEventListener('install', (event) => {
 
 // Активация Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
+  console.log('Service Worker: Activating v2...');
   
   event.waitUntil(
     Promise.all([
@@ -42,7 +55,7 @@ self.addEventListener('activate', (event) => {
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE_NAME) {
+            if (!cacheName.includes('v2')) {
               console.log('Service Worker: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
@@ -51,6 +64,8 @@ self.addEventListener('activate', (event) => {
       }),
       // Берем контроль над всеми клиентами
       self.clients.claim(),
+      // Управляем размером кэша
+      manageCacheSize(),
     ])
   );
 });
@@ -164,6 +179,87 @@ self.addEventListener('message', (event) => {
       })
     );
   }
+
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(clearAllCaches());
+  }
+
+  if (event.data && event.data.type === 'GET_CACHE_SIZE') {
+    event.waitUntil(getCacheSize().then(size => {
+      event.ports[0].postMessage({ type: 'CACHE_SIZE', size });
+    }));
+  }
+});
+
+// Обработка push уведомлений
+self.addEventListener('push', (event) => {
+  console.log('Service Worker: Push event received');
+  
+  let data = {};
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data = { title: 'Military Focus', body: event.data.text() };
+    }
+  }
+
+  const options = {
+    body: data.body || 'Новая важная новость',
+    icon: '/icon-192.png',
+    badge: '/icon-96.png',
+    tag: data.tag || 'military-focus-news',
+    requireInteraction: data.requireInteraction || false,
+    actions: data.actions || [
+      {
+        action: 'open',
+        title: 'Открыть'
+      },
+      {
+        action: 'dismiss',
+        title: 'Закрыть'
+      }
+    ],
+    data: {
+      url: data.url || '/',
+      timestamp: Date.now()
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Military Focus', options)
+  );
+});
+
+// Обработка кликов по уведомлениям
+self.addEventListener('notificationclick', (event) => {
+  console.log('Service Worker: Notification clicked');
+  
+  event.notification.close();
+  
+  if (event.action === 'open' || !event.action) {
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then((clientList) => {
+        // Если приложение уже открыто, фокусируемся на нем
+        for (const client of clientList) {
+          if (client.url === event.notification.data?.url && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        
+        // Иначе открываем новое окно
+        if (clients.openWindow) {
+          return clients.openWindow(event.notification.data?.url || '/');
+        }
+      })
+    );
+  }
+});
+
+// Обработка закрытия уведомлений
+self.addEventListener('notificationclose', (event) => {
+  console.log('Service Worker: Notification closed');
+  // Можно добавить аналитику закрытия уведомлений
 });
 
 // Периодическая очистка кэша
@@ -173,21 +269,88 @@ self.addEventListener('periodicsync', (event) => {
   }
 });
 
+// Вспомогательные функции
 async function cleanupCache() {
-  const cache = await caches.open(CACHE_NAME);
-  const requests = await cache.keys();
-  const now = Date.now();
+  console.log('Service Worker: Cleaning up cache...');
   
-  for (const request of requests) {
-    const response = await cache.match(request);
-    const dateHeader = response?.headers.get('date');
+  const cacheNames = [CACHE_NAME, STATIC_CACHE_NAME, IMAGE_CACHE_NAME];
+  
+  for (const cacheName of cacheNames) {
+    const cache = await caches.open(cacheName);
+    const requests = await cache.keys();
+    const now = Date.now();
     
-    if (dateHeader) {
-      const responseDate = new Date(dateHeader).getTime();
-      // Удаляем записи старше 24 часов
-      if (now - responseDate > 24 * 60 * 60 * 1000) {
-        await cache.delete(request);
+    for (const request of requests) {
+      const response = await cache.match(request);
+      const dateHeader = response?.headers.get('date');
+      
+      if (dateHeader) {
+        const responseDate = new Date(dateHeader).getTime();
+        // Удаляем записи старше установленного времени
+        if (now - responseDate > CACHE_EXPIRY_TIME) {
+          await cache.delete(request);
+        }
       }
+    }
+  }
+}
+
+async function clearAllCaches() {
+  console.log('Service Worker: Clearing all caches...');
+  
+  const cacheNames = await caches.keys();
+  return Promise.all(
+    cacheNames.map(cacheName => caches.delete(cacheName))
+  );
+}
+
+async function getCacheSize() {
+  const cacheNames = await caches.keys();
+  let totalSize = 0;
+  
+  for (const cacheName of cacheNames) {
+    const cache = await caches.open(cacheName);
+    const requests = await cache.keys();
+    
+    for (const request of requests) {
+      const response = await cache.match(request);
+      if (response) {
+        const blob = await response.blob();
+        totalSize += blob.size;
+      }
+    }
+  }
+  
+  return totalSize;
+}
+
+async function manageCacheSize() {
+  const currentSize = await getCacheSize();
+  
+  if (currentSize > MAX_CACHE_SIZE) {
+    console.log('Service Worker: Cache size exceeded, cleaning up...');
+    await cleanupCache();
+  }
+}
+
+// Функция для предварительного кэширования важных ресурсов
+async function precacheImportantResources() {
+  const importantUrls = [
+    '/',
+    '/manifest.json',
+    '/icon-192.png',
+    '/icon-512.png',
+    '/offline.html'
+  ];
+  
+  const cache = await caches.open(STATIC_CACHE_NAME);
+  
+  for (const url of importantUrls) {
+    try {
+      await cache.add(url);
+      console.log('Service Worker: Precached', url);
+    } catch (error) {
+      console.warn('Service Worker: Failed to precache', url, error);
     }
   }
 }

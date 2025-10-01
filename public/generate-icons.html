@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PWA Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512" style="border: 1px solid #ccc;"></canvas>
+    <br>
+    <button onclick="generateIcon(192)">Generate 192x192</button>
+    <button onclick="generateIcon(512)">Generate 512x512</button>
+    <button onclick="generateIcon(96)">Generate 96x96</button>
+    
+    <script>
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Устанавливаем размер canvas
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Создаем градиент для фона
+            const bgGradient = ctx.createLinearGradient(0, 0, size, size);
+            bgGradient.addColorStop(0, '#1a4d1a');
+            bgGradient.addColorStop(0.5, '#2d5a2d');
+            bgGradient.addColorStop(1, '#1a4d1a');
+            
+            // Рисуем фон
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Создаем градиент для иконки
+            const iconGradient = ctx.createLinearGradient(0, 0, size, size);
+            iconGradient.addColorStop(0, '#ffd700');
+            iconGradient.addColorStop(0.5, '#ffed4e');
+            iconGradient.addColorStop(1, '#ffd700');
+            
+            ctx.fillStyle = iconGradient;
+            
+            // Рисуем военный крест
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const crossSize = size * 0.6;
+            
+            // Вертикальная полоса
+            ctx.fillRect(centerX - size * 0.03, centerY - crossSize/2, size * 0.06, crossSize);
+            
+            // Горизонтальная полоса
+            ctx.fillRect(centerX - crossSize/2, centerY - size * 0.03, crossSize, size * 0.06);
+            
+            // Центральный круг
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, size * 0.08, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Угловые декорации
+            const cornerSize = size * 0.02;
+            ctx.beginPath();
+            ctx.arc(centerX - crossSize/2, centerY - crossSize/2, cornerSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + crossSize/2, centerY - crossSize/2, cornerSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX - crossSize/2, centerY + crossSize/2, cornerSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + crossSize/2, centerY + crossSize/2, cornerSize, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Добавляем текст "MF"
+            ctx.fillStyle = iconGradient;
+            ctx.font = `bold ${size * 0.12}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('MF', centerX, centerY + size * 0.25);
+            
+            // Скачиваем изображение
+            const link = document.createElement('a');
+            link.download = `icon-${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Генерируем иконки при загрузке
+        window.onload = function() {
+            setTimeout(() => {
+                generateIcon(192);
+                setTimeout(() => generateIcon(512), 500);
+                setTimeout(() => generateIcon(96), 1000);
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
