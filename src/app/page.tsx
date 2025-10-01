@@ -7,8 +7,15 @@ import ContainerDefault from "@/components/Containers/ContainerDefault";
 import NewsCard from "@/components/News/NewsCard";
 import Pagination from "@/components/Pagination/Pagination";
 import SkeletonCard from "@/components/Loading/SkeletonCard";
+import SearchBar from "@/components/Search/SearchBar";
+import FilterBar from "@/components/Filter/FilterBar";
+import ThemeToggle from "@/components/Theme/ThemeToggle";
+import ToastContainer from "@/components/Toast/ToastContainer";
+import FavoriteButton from "@/components/Favorites/FavoriteButton";
 import { INews, IApiResponse } from "@/types/news.types";
-import { APP_CONFIG, UI_MESSAGES } from "@/constants/app.constants";
+import { APP_CONFIG, UI_MESSAGES, FILTER_OPTIONS } from "@/constants/app.constants";
+import { useToast } from "@/hooks/useToast";
+import { useSearch } from "@/hooks/useSearch";
 
 export default function Home() {
   const [apiData, setApiData] = useState<IApiResponse | null>(null);
@@ -16,6 +23,18 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [retryCount, setRetryCount] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
+
+  // Хуки для UX улучшений
+  const { toasts, success, error: showError, removeToast } = useToast();
+  const { 
+    searchQuery, 
+    filteredArticles, 
+    isSearching, 
+    handleSearch, 
+    clearSearch,
+    resultCount 
+  } = useSearch(apiData?.articles || []);
 
   const loadArticles = useCallback(async (page: number, isRetry: boolean = false) => {
     try {
@@ -25,8 +44,16 @@ export default function Home() {
       setApiData(data);
       setCurrentPage(page);
       setRetryCount(0); // Сбрасываем счетчик при успешной загрузке
+      
+      // Показываем уведомление об успешной загрузке
+      if (data.articles.length > 0) {
+        success(`Загружено ${data.articles.length} новостей`);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла неизвестная ошибка');
+      const errorMessage = err instanceof Error ? err.message : 'Произошла неизвестная ошибка';
+      setError(errorMessage);
+      showError('Ошибка загрузки', errorMessage);
+      
       if (!isRetry && retryCount < APP_CONFIG.RETRY_ATTEMPTS) {
         // Автоматический retry
         setTimeout(() => {
@@ -37,7 +64,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [retryCount]);
+  }, [retryCount, success, showError]);
 
   useEffect(() => {
     loadArticles(1);
@@ -45,6 +72,20 @@ export default function Home() {
 
   const handlePageChange = (page: number) => {
     loadArticles(page);
+  };
+
+  const handleFilterChange = (filterId: string) => {
+    setActiveFilter(filterId);
+    // Здесь можно добавить логику фильтрации по категориям
+    // Пока что просто меняем состояние
+  };
+
+  const handleFavoriteToggle = (news: INews, isFavorite: boolean) => {
+    if (isFavorite) {
+      success(UI_MESSAGES.ADDED_TO_FAVORITES);
+    } else {
+      success(UI_MESSAGES.REMOVED_FROM_FAVORITES);
+    }
   };
 
   // Компонент состояния загрузки
@@ -78,8 +119,23 @@ export default function Home() {
   // Компонент пустого состояния
   const EmptyState = () => (
     <div className="text-center py-20">
-      <div className="text-gray-400 text-lg mb-4">{UI_MESSAGES.EMPTY_TITLE}</div>
-      <p className="text-gray-500">{UI_MESSAGES.EMPTY_DESCRIPTION}</p>
+      <div className="text-gray-400 text-lg mb-4">
+        {searchQuery ? UI_MESSAGES.NO_RESULTS : UI_MESSAGES.EMPTY_TITLE}
+      </div>
+      <p className="text-gray-500">
+        {searchQuery 
+          ? `По запросу "${searchQuery}" ничего не найдено` 
+          : UI_MESSAGES.EMPTY_DESCRIPTION
+        }
+      </p>
+      {searchQuery && (
+        <button 
+          onClick={clearSearch}
+          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+        >
+          Очистить поиск
+        </button>
+      )}
     </div>
   );
 
@@ -87,6 +143,7 @@ export default function Home() {
     <main className="pb-[100px] max-[425px]:pb-[80px]">
       <Banner title="Новости СВО" description="Последние новости СВО за 2025 год" />
       <ContainerDefault>
+        {/* Хлебные крошки */}
         <div className="mb-[40px] max-[425px]:mb-[60px]">
           <div className="flex items-center gap-2 text-white mb-[20px] max-[425px]:hidden">
             <span>Главная</span>
@@ -95,23 +152,71 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Панель управления */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            {/* Поиск и фильтры */}
+            <div className="flex flex-col sm:flex-row gap-4 flex-1">
+              <div className="flex-1 max-w-md">
+                <SearchBar 
+                  onSearch={handleSearch}
+                  placeholder={UI_MESSAGES.SEARCH_PLACEHOLDER}
+                />
+              </div>
+              <FilterBar
+                filters={FILTER_OPTIONS}
+                activeFilter={activeFilter}
+                onFilterChange={handleFilterChange}
+              />
+            </div>
+            
+            {/* Переключатель темы */}
+            <ThemeToggle />
+          </div>
+
+          {/* Индикатор поиска */}
+          {isSearching && (
+            <div className="flex items-center gap-2 text-blue-400 text-sm">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+              Поиск...
+            </div>
+          )}
+
+          {/* Результаты поиска */}
+          {searchQuery && !isSearching && (
+            <div className="text-sm text-gray-400">
+              Найдено: {resultCount} {resultCount === 1 ? 'новость' : 'новостей'}
+            </div>
+          )}
+        </div>
+
         {loading && <LoadingState />}
         
         {error && !loading && <ErrorState />}
         
         {!loading && !error && apiData && (
           <>
-            {apiData.articles.length === 0 ? (
+            {(searchQuery ? filteredArticles : apiData.articles).length === 0 ? (
               <EmptyState />
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mb-[40px] md:mb-[60px]">
-                  {apiData.articles.map((news: INews) => (
-                    <NewsCard key={news.id} news={news} />
+                  {(searchQuery ? filteredArticles : apiData.articles).map((news: INews) => (
+                    <div key={news.id} className="relative group">
+                      <NewsCard news={news} />
+                      {/* Кнопка избранного */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <FavoriteButton 
+                          news={news}
+                          onToggle={handleFavoriteToggle}
+                        />
+                      </div>
+                    </div>
                   ))}
                 </div>
 
-                {apiData.totalPages && apiData.totalPages > 1 && (
+                {/* Пагинация только если не активен поиск */}
+                {!searchQuery && apiData.totalPages && apiData.totalPages > 1 && (
                   <Pagination
                     currentPage={currentPage}
                     totalPages={apiData.totalPages}
@@ -123,6 +228,9 @@ export default function Home() {
           </>
         )}
       </ContainerDefault>
+      
+      {/* Контейнер уведомлений */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </main>
   );
 }

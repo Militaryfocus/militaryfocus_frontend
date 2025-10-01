@@ -4,6 +4,7 @@ import Header from '@/components/Header/Header'
 import { Metadata } from 'next'
 import { Open_Sans, Russo_One } from "next/font/google"
 import "./globals.css"
+import "./themes.css"
 
 const russoOne = Russo_One({
   weight: "400",
