@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Главная страница -->
+  <url>
+    <loc>https://military-focus.vercel.app/</loc>
+    <lastmod>2025-01-01T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <news:news>
+      <news:publication>
+        <news:name>СВО Новости</news:name>
+        <news:language>ru</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-01T00:00:00+00:00</news:publication_date>
+      <news:title>СВО: новости, аналитика и хроника специальной военной операции 2025</news:title>
+      <news:keywords>СВО, новости, аналитика, хроника, специальная военная операция</news:keywords>
+    </news:news>
+    <image:image>
+      <image:loc>https://military-focus.vercel.app/banner.jpg</image:loc>
+      <image:title>СВО Новости - Главная страница</image:title>
+      <image:caption>Следите за хроникой событий СВО от непосредственного участника!</image:caption>
+    </image:image>
+  </url>
+  
+  <!-- Страница блогов -->
+  <url>
+    <loc>https://military-focus.vercel.app/blogs</loc>
+    <lastmod>2025-01-01T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Примеры статей (замените на реальные URL) -->
+  <url>
+    <loc>https://military-focus.vercel.app/blogs/1</loc>
+    <lastmod>2025-01-01T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <news:news>
+      <news:publication>
+        <news:name>СВО Новости</news:name>
+        <news:language>ru</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-01T00:00:00+00:00</news:publication_date>
+      <news:title>Последние новости СВО</news:title>
+      <news:keywords>СВО, новости, фронт, военные действия</news:keywords>
+    </news:news>
+  </url>
+  
+  <url>
+    <loc>https://military-focus.vercel.app/blogs/2</loc>
+    <lastmod>2025-01-01T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <news:news>
+      <news:publication>
+        <news:name>СВО Новости</news:name>
+        <news:language>ru</news:language>
+      </news:publication>
+      <news:publication_date>2025-01-01T00:00:00+00:00</news:publication_date>
+      <news:title>Аналитика военных действий</news:title>
+      <news:keywords>аналитика, военные действия, стратегия</news:keywords>
+    </news:news>
+  </url>
+  
+  <!-- Добавьте больше статей по мере необходимости -->
+  
+</urlset>

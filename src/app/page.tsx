@@ -20,6 +20,9 @@ import { INews, IApiResponse } from "@/types/news.types";
 import { APP_CONFIG, UI_MESSAGES, FILTER_OPTIONS } from "@/constants/app.constants";
 import { useToast } from "@/hooks/useToast";
 import { useSearch } from "@/hooks/useSearch";
+import PerformanceMonitor from "@/components/PerformanceMonitor/PerformanceMonitor";
+import ErrorMonitor from "@/components/ErrorMonitor/ErrorMonitor";
+import AccessibilityChecker from "@/components/AccessibilityChecker/AccessibilityChecker";
 
 export default function Home() {
   const [apiData, setApiData] = useState<IApiResponse | null>(null);
@@ -31,7 +34,7 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Хуки для UX улучшений
-  const { toasts, success, error: showError, removeToast } = useToast();
+  const { toasts, success, error: showError, removeToast, info } = useToast();
   const { 
     searchQuery, 
     filteredArticles, 
@@ -46,7 +49,19 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
+      
+      // Валидация входных параметров
+      if (!Number.isInteger(page) || page < 1) {
+        throw new Error('Некорректный номер страницы');
+      }
+      
       const data = await fetchArticles(page);
+      
+      // Дополнительная валидация данных
+      if (!data || !Array.isArray(data.articles)) {
+        throw new Error('Некорректный формат данных');
+      }
+      
       setApiData(data);
       setCurrentPage(page);
       setRetryCount(0); // Сбрасываем счетчик при успешной загрузке
@@ -54,23 +69,48 @@ export default function Home() {
       // Показываем уведомление об успешной загрузке
       if (data.articles.length > 0) {
         success(`Загружено ${data.articles.length} новостей`);
+      } else {
+        info('Новостей не найдено', 'Попробуйте обновить страницу позже');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Произошла неизвестная ошибка';
+      let errorMessage = 'Произошла неизвестная ошибка';
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      
+      // Логируем ошибку для отладки
+      console.error('Ошибка загрузки статей:', {
+        error: err,
+        page,
+        retryCount,
+        timestamp: new Date().toISOString()
+      });
+      
       setError(errorMessage);
       showError('Ошибка загрузки', errorMessage);
       
+      // Автоматический retry только для сетевых ошибок
       if (!isRetry && retryCount < APP_CONFIG.RETRY_ATTEMPTS) {
-        // Автоматический retry
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          loadArticles(page, true);
-        }, APP_CONFIG.RETRY_DELAY_BASE * (retryCount + 1)); // Увеличиваем задержку с каждой попыткой
+        const isNetworkError = errorMessage.includes('fetch') || 
+                              errorMessage.includes('network') || 
+                              errorMessage.includes('timeout') ||
+                              errorMessage.includes('503') ||
+                              errorMessage.includes('502');
+        
+        if (isNetworkError) {
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            loadArticles(page, true);
+          }, APP_CONFIG.RETRY_DELAY_BASE * (retryCount + 1));
+        }
       }
     } finally {
       setLoading(false);
     }
-  }, [retryCount, success, showError]);
+  }, [retryCount, success, showError, info]);
 
   useEffect(() => {
     loadArticles(1);
@@ -258,6 +298,15 @@ export default function Home() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
       />
+      
+      {/* Компоненты мониторинга (только в development режиме) */}
+      {process.env.NODE_ENV === 'development' && (
+        <>
+          <PerformanceMonitor />
+          <ErrorMonitor />
+          <AccessibilityChecker />
+        </>
+      )}
     </main>
   );
 }
