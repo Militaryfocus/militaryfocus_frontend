@@ -4,6 +4,8 @@ import Header from '@/components/Header/Header'
 import { Metadata } from 'next'
 import { Open_Sans, Russo_One } from "next/font/google"
 import "./globals.css"
+import "./themes.css"
+import ServiceWorkerProvider from './ServiceWorkerProvider'
 
 const russoOne = Russo_One({
   weight: "400",
@@ -58,11 +60,13 @@ export default function RootLayout({
       <body
         className={`${russoOne.variable} ${openSans.variable} antialiased`}
       >
-        <Wide>
-          <Header />
-          {children}
-          <Footer />
-        </Wide>
+        <ServiceWorkerProvider>
+          <Wide>
+            <Header />
+            {children}
+            <Footer />
+          </Wide>
+        </ServiceWorkerProvider>
       </body>
     </html>
   )
