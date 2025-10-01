@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { FiSearch, FiMenu, FiX, FiUser, FiLogIn, FiUserPlus, FiBell, FiSettings } from 'react-icons/fi'
+import { FiSearch, FiMenu, FiX, FiLogIn, FiUserPlus, FiBell, FiSettings } from 'react-icons/fi'
 import ContainerDefault from '../Containers/ContainerDefault'
 import ThemeToggle from '../Theme/ThemeToggle'
 import { NavContent } from './Nav'
