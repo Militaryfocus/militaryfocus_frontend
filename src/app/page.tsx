@@ -22,6 +22,9 @@ import { useSearch } from "@/hooks/useSearch";
 import PerformanceMonitor from "@/components/PerformanceMonitor/PerformanceMonitor";
 import ErrorMonitor from "@/components/ErrorMonitor/ErrorMonitor";
 import AccessibilityChecker from "@/components/AccessibilityChecker/AccessibilityChecker";
+import PWAInstallButton from "@/components/PWA/PWAInstallButton";
+import PWAManager from "@/components/PWA/PWAManager";
+import ServiceWorkerProvider from "@/components/PWA/ServiceWorkerProvider";
 
 export default function Home() {
   const [apiData, setApiData] = useState<IApiResponse | null>(null);
@@ -200,7 +203,8 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen pt-20">
+    <ServiceWorkerProvider>
+      <main className="min-h-screen pt-20">
       <Banner 
         title="Новости СВО" 
         description="Последние новости СВО за 2025 год от непосредственного участника событий" 
@@ -335,8 +339,13 @@ export default function Home() {
           <PerformanceMonitor />
           <ErrorMonitor />
           <AccessibilityChecker />
+          <PWAManager className="fixed bottom-4 left-4 z-40 max-w-sm" />
         </>
       )}
+      
+      {/* PWA компоненты */}
+      <PWAInstallButton />
     </main>
+    </ServiceWorkerProvider>
   );
 }
