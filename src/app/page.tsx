@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { FiSettings } from "react-icons/fi";
+import { FiSettings, FiHome } from "react-icons/fi";
 import { fetchArticles } from "@/api/api/articles";
 import Banner from "@/components/Banner/Banner";
 import ContainerDefault from "@/components/Containers/ContainerDefault";
 import NewsCard from "@/components/News/NewsCard";
-import Pagination from "@/components/Pagination/Pagination";
 import SkeletonCard from "@/components/Loading/SkeletonCard";
 import SearchBar from "@/components/Search/SearchBar";
 import FilterBar from "@/components/Filter/FilterBar";
@@ -16,6 +15,13 @@ import FavoriteButton from "@/components/Favorites/FavoriteButton";
 import SettingsModal from "@/components/Settings/SettingsModal";
 import VoiceSearch from "@/components/VoiceSearch/VoiceSearch";
 import ExportFavorites from "@/components/Export/ExportFavorites";
+import MicroInteraction, { FadeIn } from "@/components/Animations/MicroInteractions";
+import { LoadingProgress } from "@/components/Progress/ProgressBar";
+import { Tooltip, Tour, useTour } from "@/components/Help/Tooltips";
+import { KeyboardShortcuts, useKeyboardShortcuts } from "@/components/Keyboard/KeyboardShortcuts";
+import SmartSorting, { Recommendations } from "@/components/Smart/SmartSorting";
+import { Breadcrumbs, PageNavigation } from "@/components/Navigation/EnhancedNavigation";
+import { NavigationGestures, useDeviceType, GestureTutorial, useGestures } from "@/components/Gestures/SwipeGestures";
 import { INews, IApiResponse } from "@/types/news.types";
 import { APP_CONFIG, UI_MESSAGES, FILTER_OPTIONS } from "@/constants/app.constants";
 import { useToast } from "@/hooks/useToast";
@@ -29,9 +35,16 @@ export default function Home() {
   const [retryCount, setRetryCount] = useState(0);
   const [activeFilter, setActiveFilter] = useState('all');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [sortedArticles, setSortedArticles] = useState<INews[]>([]);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // Хуки для UX улучшений
   const { toasts, success, error: showError, removeToast } = useToast();
+  const { shortcuts, addShortcut } = useKeyboardShortcuts();
+  const { isOpen: isTourOpen, startTour, closeTour, completeTour } = useTour();
+  const { isTouchDevice } = useDeviceType();
+  const { gesturesEnabled, showTutorial, closeTutorial } = useGestures();
+  
   const { 
     searchQuery, 
     filteredArticles, 
@@ -46,10 +59,21 @@ export default function Home() {
     try {
       setLoading(true);
       setError(null);
+      setLoadingProgress(0);
+      
+      // Симуляция прогресса загрузки
+      const progressInterval = setInterval(() => {
+        setLoadingProgress(prev => Math.min(prev + 10, 90));
+      }, 100);
+      
       const data = await fetchArticles(page);
+      clearInterval(progressInterval);
+      setLoadingProgress(100);
+      
       setApiData(data);
+      setSortedArticles(data.articles);
       setCurrentPage(page);
-      setRetryCount(0); // Сбрасываем счетчик при успешной загрузке
+      setRetryCount(0);
       
       // Показываем уведомление об успешной загрузке
       if (data.articles.length > 0) {
@@ -61,14 +85,14 @@ export default function Home() {
       showError('Ошибка загрузки', errorMessage);
       
       if (!isRetry && retryCount < APP_CONFIG.RETRY_ATTEMPTS) {
-        // Автоматический retry
         setTimeout(() => {
           setRetryCount(prev => prev + 1);
           loadArticles(page, true);
-        }, APP_CONFIG.RETRY_DELAY_BASE * (retryCount + 1)); // Увеличиваем задержку с каждой попыткой
+        }, APP_CONFIG.RETRY_DELAY_BASE * (retryCount + 1));
       }
     } finally {
       setLoading(false);
+      setLoadingProgress(0);
     }
   }, [retryCount, success, showError]);
 
@@ -76,9 +100,42 @@ export default function Home() {
     loadArticles(1);
   }, [loadArticles]);
 
-  const handlePageChange = (page: number) => {
+  // Настройка клавиатурных сокращений
+  useEffect(() => {
+    addShortcut({
+      key: 'ctrl+f',
+      description: 'Поиск',
+      action: () => {
+        const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        searchInput?.focus();
+      }
+    });
+
+    addShortcut({
+      key: 'ctrl+s',
+      description: 'Настройки',
+      action: () => setIsSettingsOpen(true)
+    });
+
+    addShortcut({
+      key: 'escape',
+      description: 'Закрыть модальные окна',
+      action: () => {
+        setIsSettingsOpen(false);
+        closeTour();
+      }
+    });
+
+    addShortcut({
+      key: 'ctrl+h',
+      description: 'Показать помощь',
+      action: () => startTour('main-tour')
+    });
+  }, [addShortcut, closeTour, startTour]);
+
+  const handlePageChange = useCallback((page: number) => {
     loadArticles(page);
-  };
+  }, [loadArticles]);
 
   const handleFilterChange = (filterId: string) => {
     setActiveFilter(filterId);
@@ -93,6 +150,24 @@ export default function Home() {
       success(UI_MESSAGES.REMOVED_FROM_FAVORITES);
     }
   };
+
+  // Обработчики жестов
+  const handleGestureNext = useCallback(() => {
+    if (apiData && currentPage < apiData.totalPages!) {
+      handlePageChange(currentPage + 1);
+    }
+  }, [apiData, currentPage, handlePageChange]);
+
+  const handleGesturePrevious = useCallback(() => {
+    if (currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  }, [currentPage, handlePageChange]);
+
+  const handleGestureRefresh = useCallback(() => {
+    loadArticles(currentPage);
+    success('Страница обновлена');
+  }, [loadArticles, currentPage, success]);
 
   // Компонент состояния загрузки
   const LoadingState = () => (
@@ -146,103 +221,168 @@ export default function Home() {
   );
 
   return (
-    <main className="pb-[100px] max-[425px]:pb-[80px]">
+    <NavigationGestures
+      onNext={gesturesEnabled ? handleGestureNext : undefined}
+      onPrevious={gesturesEnabled ? handleGesturePrevious : undefined}
+      onRefresh={gesturesEnabled ? handleGestureRefresh : undefined}
+    >
+      <main className="pb-[100px] max-[425px]:pb-[80px]">
+      {/* Прогресс загрузки */}
+      <LoadingProgress 
+        isLoading={loading} 
+        progress={loadingProgress}
+        message="Загружаем новости..."
+      />
+
       <Banner title="Новости СВО" description="Последние новости СВО за 2025 год" />
       <ContainerDefault>
-        {/* Хлебные крошки */}
-        <div className="mb-[40px] max-[425px]:mb-[60px]">
-          <div className="flex items-center gap-2 text-white mb-[20px] max-[425px]:hidden">
-            <span>Главная</span>
-            <span>/</span>
-            <span>Новости</span>
+        {/* Улучшенные хлебные крошки */}
+        <FadeIn delay={100}>
+          <div className="mb-[40px] max-[425px]:mb-[60px]">
+            <Breadcrumbs 
+              items={[
+                { label: 'Главная', href: '/', icon: <FiHome className="h-4 w-4" /> },
+                { label: 'Новости' }
+              ]}
+              className="max-[425px]:hidden"
+            />
           </div>
-        </div>
+        </FadeIn>
 
-        {/* Панель управления */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            {/* Поиск и фильтры */}
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="flex-1 max-w-md">
-                <SearchBar 
-                  onSearch={handleSearch}
-                  placeholder={UI_MESSAGES.SEARCH_PLACEHOLDER}
-                />
+        {/* Панель управления с микро-взаимодействиями */}
+        <FadeIn delay={200}>
+          <div className="mb-8 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              {/* Поиск и фильтры */}
+              <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="flex-1 max-w-md">
+                  <MicroInteraction type="focus" animation="scale" intensity="subtle">
+                    <SearchBar
+                      onSearch={handleSearch}
+                      placeholder={UI_MESSAGES.SEARCH_PLACEHOLDER}
+                    />
+                  </MicroInteraction>
+                </div>
+                <MicroInteraction type="hover" animation="scale" intensity="subtle">
+                  <FilterBar
+                    filters={FILTER_OPTIONS}
+                    activeFilter={activeFilter}
+                    onFilterChange={handleFilterChange}
+                  />
+                </MicroInteraction>
               </div>
-              <FilterBar
-                filters={FILTER_OPTIONS}
-                activeFilter={activeFilter}
-                onFilterChange={handleFilterChange}
+
+              {/* Управляющие элементы */}
+              <div className="flex items-center gap-2">
+                <MicroInteraction type="hover" animation="bounce" intensity="subtle">
+                  <VoiceSearch onSearch={handleSearch} />
+                </MicroInteraction>
+                
+                <MicroInteraction type="hover" animation="scale" intensity="subtle">
+                  <ThemeToggle />
+                </MicroInteraction>
+                
+                <MicroInteraction type="click" animation="scale" intensity="medium">
+                  <Tooltip content="Настройки приложения (Ctrl+S)">
+                    <button
+                      onClick={() => setIsSettingsOpen(true)}
+                      className="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400
+                               hover:text-white hover:bg-gray-700 transition-colors"
+                      title="Настройки"
+                    >
+                      <FiSettings className="h-4 w-4" />
+                    </button>
+                  </Tooltip>
+                </MicroInteraction>
+
+                <KeyboardShortcuts shortcuts={shortcuts} />
+              </div>
+            </div>
+
+            {/* Умная сортировка */}
+            <FadeIn delay={300}>
+              <SmartSorting 
+                articles={apiData?.articles || []}
+                onSort={setSortedArticles}
               />
-            </div>
-            
-            {/* Управляющие элементы */}
-            <div className="flex items-center gap-2">
-              <VoiceSearch onSearch={handleSearch} />
-              <ThemeToggle />
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 
-                         hover:text-white hover:bg-gray-700 transition-colors"
-                title="Настройки"
-              >
-                <FiSettings className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+            </FadeIn>
 
-          {/* Индикатор поиска */}
-          {isSearching && (
-            <div className="flex items-center gap-2 text-blue-400 text-sm">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
-              Поиск...
-            </div>
-          )}
-
-          {/* Результаты поиска */}
-          {searchQuery && !isSearching && (
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-400">
-                Найдено: {resultCount} {resultCount === 1 ? 'новость' : 'новостей'}
-                {cacheHit && <span className="ml-2 text-green-400">(из кэша)</span>}
+            {/* Индикатор поиска */}
+            {isSearching && (
+              <div className="flex items-center gap-2 text-blue-400 text-sm">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                Поиск...
               </div>
-              <ExportFavorites />
-            </div>
-          )}
-        </div>
+            )}
+
+            {/* Результаты поиска */}
+            {searchQuery && !isSearching && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-400">
+                  Найдено: {resultCount} {resultCount === 1 ? 'новость' : 'новостей'}
+                  {cacheHit && <span className="ml-2 text-green-400">(из кэша)</span>}
+                </div>
+                <ExportFavorites />
+              </div>
+            )}
+          </div>
+        </FadeIn>
 
         {loading && <LoadingState />}
         
         {error && !loading && <ErrorState />}
-        
+
         {!loading && !error && apiData && (
           <>
-            {(searchQuery ? filteredArticles : apiData.articles).length === 0 ? (
+            {(searchQuery ? filteredArticles : sortedArticles).length === 0 ? (
               <EmptyState />
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mb-[40px] md:mb-[60px]">
-                  {(searchQuery ? filteredArticles : apiData.articles).map((news: INews) => (
-                    <div key={news.id} className="relative group">
-                      <NewsCard news={news} />
-                      {/* Кнопка избранного */}
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <FavoriteButton 
-                          news={news}
-                          onToggle={handleFavoriteToggle}
-                        />
-                      </div>
+                {/* Рекомендации */}
+                {!searchQuery && sortedArticles.length > 0 && (
+                  <FadeIn delay={400}>
+                    <div className="mb-6">
+                      <Recommendations articles={sortedArticles} />
                     </div>
-                  ))}
-                </div>
+                  </FadeIn>
+                )}
 
-                {/* Пагинация только если не активен поиск */}
+                {/* Сетка новостей с микро-взаимодействиями */}
+                <FadeIn delay={500}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mb-[40px] md:mb-[60px]">
+                    {(searchQuery ? filteredArticles : sortedArticles).map((news: INews, index: number) => (
+                      <MicroInteraction 
+                        key={news.id} 
+                        type="load" 
+                        animation="fade" 
+                        delay={index * 100}
+                        className="relative group"
+                      >
+                        <NewsCard news={news} />
+                        {/* Кнопка избранного с тултипом */}
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <Tooltip content="Добавить в избранное">
+                            <FavoriteButton
+                              news={news}
+                              onToggle={handleFavoriteToggle}
+                            />
+                          </Tooltip>
+                        </div>
+                      </MicroInteraction>
+                    ))}
+                  </div>
+                </FadeIn>
+
+                {/* Улучшенная пагинация */}
                 {!searchQuery && apiData.totalPages && apiData.totalPages > 1 && (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={apiData.totalPages}
-                    onPageChange={handlePageChange}
-                  />
+                  <FadeIn delay={600}>
+                    <PageNavigation
+                      currentPage={currentPage}
+                      totalPages={apiData.totalPages}
+                      onPageChange={handlePageChange}
+                      showQuickJump={true}
+                    />
+                  </FadeIn>
                 )}
               </>
             )}
@@ -252,12 +392,56 @@ export default function Home() {
       
       {/* Контейнер уведомлений */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      
+
       {/* Модальное окно настроек */}
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
-    </main>
+
+      {/* Интерактивный тур */}
+      <Tour
+        steps={[
+          {
+            id: 'search',
+            target: 'input[type="text"]',
+            title: 'Поиск новостей',
+            content: 'Используйте поиск для быстрого нахождения интересующих вас новостей. Поддерживается поиск по заголовкам и датам.',
+            position: 'bottom'
+          },
+          {
+            id: 'filters',
+            target: 'select',
+            title: 'Фильтрация',
+            content: 'Фильтруйте новости по категориям: СВО, Вооружение, Аналитика и другие.',
+            position: 'bottom'
+          },
+          {
+            id: 'favorites',
+            target: 'button[aria-label*="избранное"]',
+            title: 'Избранное',
+            content: 'Добавляйте понравившиеся новости в избранное для быстрого доступа.',
+            position: 'left'
+          },
+          {
+            id: 'settings',
+            target: 'button[title="Настройки"]',
+            title: 'Настройки',
+            content: 'Настройте приложение под себя: тема, размер шрифта, уведомления и многое другое.',
+            position: 'left'
+          }
+        ]}
+        isOpen={isTourOpen}
+        onClose={closeTour}
+        onComplete={completeTour}
+      />
+
+      {/* Обучение жестам */}
+      <GestureTutorial
+        isVisible={showTutorial && isTouchDevice}
+        onClose={closeTutorial}
+      />
+      </main>
+    </NavigationGestures>
   );
 }
