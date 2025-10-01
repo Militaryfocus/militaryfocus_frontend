@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { FiSettings } from "react-icons/fi";
 import { fetchArticles } from "@/api/api/articles";
 import Banner from "@/components/Banner/Banner";
 import ContainerDefault from "@/components/Containers/ContainerDefault";
@@ -12,6 +13,9 @@ import FilterBar from "@/components/Filter/FilterBar";
 import ThemeToggle from "@/components/Theme/ThemeToggle";
 import ToastContainer from "@/components/Toast/ToastContainer";
 import FavoriteButton from "@/components/Favorites/FavoriteButton";
+import SettingsModal from "@/components/Settings/SettingsModal";
+import VoiceSearch from "@/components/VoiceSearch/VoiceSearch";
+import ExportFavorites from "@/components/Export/ExportFavorites";
 import { INews, IApiResponse } from "@/types/news.types";
 import { APP_CONFIG, UI_MESSAGES, FILTER_OPTIONS } from "@/constants/app.constants";
 import { useToast } from "@/hooks/useToast";
@@ -24,6 +28,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [retryCount, setRetryCount] = useState(0);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Хуки для UX улучшений
   const { toasts, success, error: showError, removeToast } = useToast();
@@ -31,6 +36,7 @@ export default function Home() {
     searchQuery, 
     filteredArticles, 
     isSearching, 
+    cacheHit,
     handleSearch, 
     clearSearch,
     resultCount 
@@ -170,8 +176,19 @@ export default function Home() {
               />
             </div>
             
-            {/* Переключатель темы */}
-            <ThemeToggle />
+            {/* Управляющие элементы */}
+            <div className="flex items-center gap-2">
+              <VoiceSearch onSearch={handleSearch} />
+              <ThemeToggle />
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 
+                         hover:text-white hover:bg-gray-700 transition-colors"
+                title="Настройки"
+              >
+                <FiSettings className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Индикатор поиска */}
@@ -184,8 +201,12 @@ export default function Home() {
 
           {/* Результаты поиска */}
           {searchQuery && !isSearching && (
-            <div className="text-sm text-gray-400">
-              Найдено: {resultCount} {resultCount === 1 ? 'новость' : 'новостей'}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-400">
+                Найдено: {resultCount} {resultCount === 1 ? 'новость' : 'новостей'}
+                {cacheHit && <span className="ml-2 text-green-400">(из кэша)</span>}
+              </div>
+              <ExportFavorites />
             </div>
           )}
         </div>
@@ -231,6 +252,12 @@ export default function Home() {
       
       {/* Контейнер уведомлений */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      
+      {/* Модальное окно настроек */}
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </main>
   );
 }
