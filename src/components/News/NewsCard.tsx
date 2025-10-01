@@ -2,7 +2,6 @@ import { INews } from '@/types/news.types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FiEye, FiMessageCircle, FiClock, FiArrowRight, FiCalendar } from 'react-icons/fi'
-import { BASE_URL } from '@/api/api/articles'
 
 interface NewsCardProps {
     news: INews
@@ -55,7 +54,7 @@ export default function NewsCard({ news, variant = 'default', showStats = true }
                 {/* Image */}
                 <div className={imageClasses[variant]}>
                     <Image
-                        src={`${BASE_URL}/media/${news.article_image}` || '/assets/banner.jpg'}
+                        src={news.article_image || '/assets/banner.jpg'}
                         alt={`Фото: ${news.article_title} - новости СВО 2025`}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"

@@ -5,7 +5,6 @@ import Link from 'next/link'
 // Import Icons
 import Comment from '@/assets/icons/comment-icon.svg'
 import Eye from '@/assets/icons/eye-icon.svg'
-import { BASE_URL } from '@/api/api/articles'
 
 interface BigNewsCardProps {
     news: INews
@@ -17,7 +16,7 @@ export default function BigNewsCard({ news }: BigNewsCardProps) {
             <div className="relative w-full h-[339px] max-[1024px]:h-[400px] max-[425px]:h-[300px] group">
                 {/* Background Image */}
                 <Image
-                    src={`${BASE_URL}/media/${news.article_image}` || '/assets/banner.jpg'}
+                    src={news.article_image || '/assets/banner.jpg'}
                     alt={news.article_title}
                     fill
                     className="object-cover rounded-[4px]"

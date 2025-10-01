@@ -5,7 +5,6 @@ import Link from 'next/link'
 // Import Img
 import Comment from '@/assets/icons/comment-icon.svg'
 import Eye from '@/assets/icons/eye-icon.svg'
-import { BASE_URL } from '@/api/api/articles'
 
 interface NewsCardProps {
     news: INews
@@ -17,7 +16,7 @@ export default function SmallNewsCard({ news }: NewsCardProps) {
             <div className="group cursor-pointer">
                 <div className="relative h-[220px] max-[425px]:h-[220px] max-[425px]:w-full max-[425px]:mx-auto overflow-hidden rounded-[4px]">
                     <Image
-                        src={`${BASE_URL}/media/${news.article_image}` || '/assets/banner.jpg'}
+                        src={news.article_image || '/assets/banner.jpg'}
                         alt={news.article_title}
                         fill
                         className="object-cover transition-transform  group-hover:scale-105"
