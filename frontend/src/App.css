@@ -1,0 +1,256 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Кастомные стили для Mobile Legends Community Platform */
+
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Стили для карточек героев */
+.hero-card {
+  @apply bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105;
+}
+
+.hero-card:hover {
+  transform: translateY(-4px);
+}
+
+.hero-image {
+  @apply relative overflow-hidden;
+  height: 200px;
+}
+
+.hero-image img {
+  @apply w-full h-full object-cover transition-transform duration-300;
+}
+
+.hero-card:hover .hero-image img {
+  transform: scale(1.1);
+}
+
+.hero-role {
+  @apply absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-semibold text-white;
+}
+
+.role-tank { @apply bg-blue-600; }
+.role-assassin { @apply bg-red-600; }
+.role-mage { @apply bg-purple-600; }
+.role-marksman { @apply bg-green-600; }
+.role-support { @apply bg-yellow-600; }
+.role-fighter { @apply bg-orange-600; }
+
+/* Стили для статистики героев */
+.stat-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.stat-fill {
+  @apply h-2 rounded-full transition-all duration-500;
+}
+
+.stat-durability { @apply bg-green-500; }
+.stat-offense { @apply bg-red-500; }
+.stat-control { @apply bg-blue-500; }
+.stat-difficulty { @apply bg-purple-500; }
+
+/* Стили для гайдов */
+.guide-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
+}
+
+.guide-header {
+  @apply p-4 border-b border-gray-200;
+}
+
+.guide-content {
+  @apply p-4;
+}
+
+.guide-footer {
+  @apply px-4 py-3 bg-gray-50 flex items-center justify-between;
+}
+
+/* Стили для рейтинга */
+.rating-stars {
+  @apply flex items-center space-x-1;
+}
+
+.star {
+  @apply w-4 h-4 text-yellow-400;
+}
+
+.star-empty {
+  @apply text-gray-300;
+}
+
+/* Стили для кнопок */
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-outline {
+  @apply border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Стили для форм */
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+}
+
+.form-textarea {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-vertical;
+}
+
+.form-select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-error {
+  @apply text-red-600 text-sm mt-1;
+}
+
+/* Стили для навигации */
+.nav-link {
+  @apply text-gray-600 hover:text-primary-600 font-medium transition-colors duration-200;
+}
+
+.nav-link.active {
+  @apply text-primary-600;
+}
+
+/* Стили для модальных окон */
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-screen overflow-y-auto;
+}
+
+/* Стили для загрузки */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600;
+}
+
+.loading-overlay {
+  @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
+}
+
+/* Стили для уведомлений */
+.toast-success {
+  @apply bg-green-500 text-white;
+}
+
+.toast-error {
+  @apply bg-red-500 text-white;
+}
+
+.toast-warning {
+  @apply bg-yellow-500 text-white;
+}
+
+.toast-info {
+  @apply bg-blue-500 text-white;
+}
+
+/* Стили для поиска */
+.search-input {
+  @apply w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+}
+
+.search-icon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400;
+}
+
+/* Стили для пагинации */
+.pagination {
+  @apply flex items-center justify-center space-x-2;
+}
+
+.pagination-btn {
+  @apply px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200;
+}
+
+.pagination-btn.active {
+  @apply bg-primary-600 text-white border-primary-600;
+}
+
+.pagination-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Стили для тегов */
+.tag {
+  @apply inline-block px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.tag-meta { @apply bg-green-100 text-green-800; }
+.tag-off-meta { @apply bg-yellow-100 text-yellow-800; }
+.tag-rank-specific { @apply bg-blue-100 text-blue-800; }
+.tag-beginner { @apply bg-purple-100 text-purple-800; }
+.tag-advanced { @apply bg-red-100 text-red-800; }
+
+/* Стили для рангов */
+.rank-badge {
+  @apply inline-block px-3 py-1 text-sm font-semibold rounded-full;
+}
+
+.rank-warrior { @apply bg-gray-100 text-gray-800; }
+.rank-elite { @apply bg-green-100 text-green-800; }
+.rank-master { @apply bg-blue-100 text-blue-800; }
+.rank-epic { @apply bg-purple-100 text-purple-800; }
+.rank-legend { @apply bg-yellow-100 text-yellow-800; }
+.rank-mythic { @apply bg-red-100 text-red-800; }
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .hero-card {
+    @apply mx-2;
+  }
+  
+  .guide-card {
+    @apply mx-2;
+  }
+  
+  .modal-content {
+    @apply mx-2;
+  }
+}
+
+/* Темная тема (опционально) */
+@media (prefers-color-scheme: dark) {
+  .App {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+}
