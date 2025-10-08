@@ -1,0 +1,50 @@
+# .do/app.yaml - DigitalOcean App Platform конфигурация
+
+name: ml-community-platform
+services:
+- name: backend
+  source_dir: backend
+  github:
+    repo: Militaryfocus/Baga
+    branch: main
+  run_command: uvicorn app.main:app --host 0.0.0.0 --port 8080
+  environment_slug: python
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  envs:
+  - key: DATABASE_URL
+    value: ${db.DATABASE_URL}
+  - key: REDIS_URL
+    value: ${redis.REDIS_URL}
+  - key: SECRET_KEY
+    value: ${SECRET_KEY}
+  - key: ENVIRONMENT
+    value: production
+  - key: DEBUG
+    value: "false"
+
+- name: frontend
+  source_dir: frontend
+  github:
+    repo: Militaryfocus/Baga
+    branch: main
+  run_command: npm start
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  envs:
+  - key: REACT_APP_API_URL
+    value: ${backend.PUBLIC_URL}/api/v1
+  routes:
+  - path: /
+
+databases:
+- name: db
+  engine: PG
+  version: "13"
+  size: db-s-dev-database
+
+- name: redis
+  engine: REDIS
+  version: "6"
+  size: db-s-dev-database

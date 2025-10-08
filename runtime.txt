@@ -1,0 +1,3 @@
+# runtime.txt для Heroku
+
+python-3.9.18
