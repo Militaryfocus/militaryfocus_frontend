@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Standalone режим для Docker
+  output: 'standalone',
+  
   // Безопасность
   async headers() {
     return [
