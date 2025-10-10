@@ -1,0 +1,55 @@
+from typing import List, Union
+from pydantic import BaseSettings, validator
+import os
+
+class Settings(BaseSettings):
+    # Database
+    DATABASE_URL: str = "postgresql://ml_user:ml_password@db:5432/ml_community"
+    
+    # Redis
+    REDIS_URL: str = "redis://redis:6379"
+    
+    # Security
+    SECRET_KEY: str = "your-secret-key-change-in-production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    # CORS
+    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost", "http://localhost:3000", "http://localhost:80"]
+    
+    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
+    
+    # File Upload
+    MAX_FILE_SIZE: int = 10485760  # 10MB
+    UPLOAD_DIRECTORY: str = "/app/static/uploads"
+    
+    # API
+    API_V1_STR: str = "/api/v1"
+    PROJECT_NAME: str = "Mobile Legends Community Platform"
+    
+    # Email
+    SMTP_TLS: bool = True
+    SMTP_PORT: int = 587
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    
+    # External APIs
+    ML_OFFICIAL_API_URL: str = "https://api.mobilelegends.com"
+    ML_OFFICIAL_API_KEY: str = ""
+    
+    # Environment
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = True
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+settings = Settings()
