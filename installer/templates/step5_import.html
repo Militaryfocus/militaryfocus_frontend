@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}Шаг 5: Импорт данных - Установщик ML Community{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-8">
+        <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-download text-2xl text-blue-600"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Шаг 5: Импорт данных</h1>
+        <p class="text-gray-600">Загрузите начальные данные для работы платформы</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Данные для импорта</h2>
+        
+        <div class="space-y-6">
+            <!-- Миграции базы данных -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-database text-2xl text-blue-600 mr-4"></i>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Миграции базы данных</h3>
+                            <p class="text-gray-600">Создание таблиц и индексов</p>
+                        </div>
+                    </div>
+                    <button id="run-migrations-btn" 
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                        <i class="fas fa-play mr-2"></i>
+                        Запустить
+                    </button>
+                </div>
+                <div id="migrations-status" class="mt-4 hidden">
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-blue-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Выполнение миграций...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Герои -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-ninja text-2xl text-purple-600 mr-4"></i>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Герои Mobile Legends</h3>
+                            <p class="text-gray-600">Импорт всех героев с навыками и характеристиками</p>
+                        </div>
+                    </div>
+                    <button id="import-heroes-btn" 
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition-colors duration-200 disabled:opacity-50"
+                            disabled>
+                        <i class="fas fa-download mr-2"></i>
+                        Импортировать
+                    </button>
+                </div>
+                <div id="heroes-status" class="mt-4 hidden">
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-purple-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Импорт героев...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Предметы -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-gem text-2xl text-green-600 mr-4"></i>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Предметы и экипировка</h3>
+                            <p class="text-gray-600">Импорт предметов, эмблем и заклинаний</p>
+                        </div>
+                    </div>
+                    <button id="import-items-btn" 
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50"
+                            disabled>
+                        <i class="fas fa-download mr-2"></i>
+                        Импортировать
+                    </button>
+                </div>
+                <div id="items-status" class="mt-4 hidden">
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-green-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Импорт предметов...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Начальные гайды -->
+            <div class="border border-gray-200 rounded-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-book text-2xl text-orange-600 mr-4"></i>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Примеры гайдов</h3>
+                            <p class="text-gray-600">Импорт примеров гайдов для демонстрации</p>
+                        </div>
+                    </div>
+                    <button id="import-guides-btn" 
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors duration-200 disabled:opacity-50"
+                            disabled>
+                        <i class="fas fa-download mr-2"></i>
+                        Импортировать
+                    </button>
+                </div>
+                <div id="guides-status" class="mt-4 hidden">
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-orange-600 mr-2"></i>
+                            <span class="text-sm text-gray-700">Импорт гайдов...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <button id="import-all-btn" 
+                    class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                <i class="fas fa-magic mr-2"></i>
+                Импортировать все данные
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-400"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">О импорте данных</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <p>Импорт включает в себя:</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>Всех героев Mobile Legends с актуальными данными</li>
+                        <li>Предметы, эмблемы и заклинания</li>
+                        <li>Примеры гайдов для демонстрации функционала</li>
+                        <li>Настройки ролей и разрешений</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between">
+        <a href="/step/4" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Назад
+        </a>
+        
+        <button id="next-btn" 
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+            <i class="fas fa-arrow-right mr-2"></i>
+            Завершить
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const runMigrationsBtn = document.getElementById('run-migrations-btn');
+    const importHeroesBtn = document.getElementById('import-heroes-btn');
+    const importItemsBtn = document.getElementById('import-items-btn');
+    const importGuidesBtn = document.getElementById('import-guides-btn');
+    const importAllBtn = document.getElementById('import-all-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    let migrationsCompleted = false;
+    
+    // Запуск миграций
+    runMigrationsBtn.addEventListener('click', function() {
+        showLoading(runMigrationsBtn);
+        document.getElementById('migrations-status').classList.remove('hidden');
+        
+        axios.post('/api/run-migrations')
+            .then(response => {
+                hideLoading(runMigrationsBtn, '<i class="fas fa-play mr-2"></i>Запустить');
+                
+                if (response.data.success) {
+                    showAlert(response.data.message, 'success');
+                    migrationsCompleted = true;
+                    enableImportButtons();
+                    updateMigrationsStatus('success', 'Миграции выполнены успешно!');
+                } else {
+                    showAlert(response.data.message, 'error');
+                    updateMigrationsStatus('error', 'Ошибка выполнения миграций');
+                }
+            })
+            .catch(error => {
+                hideLoading(runMigrationsBtn, '<i class="fas fa-play mr-2"></i>Запустить');
+                showAlert('Ошибка при выполнении миграций: ' + error.message, 'error');
+                updateMigrationsStatus('error', 'Ошибка выполнения миграций');
+            });
+    });
+    
+    // Импорт героев
+    importHeroesBtn.addEventListener('click', function() {
+        importData('heroes', importHeroesBtn, 'heroes-status');
+    });
+    
+    // Импорт предметов
+    importItemsBtn.addEventListener('click', function() {
+        importData('items', importItemsBtn, 'items-status');
+    });
+    
+    // Импорт гайдов
+    importGuidesBtn.addEventListener('click', function() {
+        importData('guides', importGuidesBtn, 'guides-status');
+    });
+    
+    // Импорт всех данных
+    importAllBtn.addEventListener('click', function() {
+        if (!migrationsCompleted) {
+            showAlert('Сначала выполните миграции базы данных', 'warning');
+            return;
+        }
+        
+        showLoading(importAllBtn);
+        
+        // Последовательно импортируем все данные
+        Promise.all([
+            axios.post('/api/import-data', { type: 'heroes' }),
+            axios.post('/api/import-data', { type: 'items' }),
+            axios.post('/api/import-data', { type: 'guides' })
+        ])
+        .then(responses => {
+            hideLoading(importAllBtn, '<i class="fas fa-magic mr-2"></i>Импортировать все данные');
+            
+            const allSuccess = responses.every(r => r.data.success);
+            if (allSuccess) {
+                showAlert('Все данные импортированы успешно!', 'success');
+                nextBtn.disabled = false;
+            } else {
+                showAlert('Некоторые данные не удалось импортировать', 'warning');
+            }
+        })
+        .catch(error => {
+            hideLoading(importAllBtn, '<i class="fas fa-magic mr-2"></i>Импортировать все данные');
+            showAlert('Ошибка при импорте данных: ' + error.message, 'error');
+        });
+    });
+    
+    nextBtn.addEventListener('click', function() {
+        window.location.href = '/step/6';
+    });
+    
+    function enableImportButtons() {
+        importHeroesBtn.disabled = false;
+        importItemsBtn.disabled = false;
+        importGuidesBtn.disabled = false;
+    }
+    
+    function importData(type, button, statusId) {
+        showLoading(button);
+        document.getElementById(statusId).classList.remove('hidden');
+        
+        axios.post('/api/import-data', { type: type })
+            .then(response => {
+                hideLoading(button, '<i class="fas fa-download mr-2"></i>Импортировать');
+                
+                if (response.data.success) {
+                    showAlert(response.data.message, 'success');
+                    updateImportStatus(statusId, 'success', 'Импорт завершен успешно!');
+                } else {
+                    showAlert(response.data.message, 'error');
+                    updateImportStatus(statusId, 'error', 'Ошибка импорта');
+                }
+            })
+            .catch(error => {
+                hideLoading(button, '<i class="fas fa-download mr-2"></i>Импортировать');
+                showAlert('Ошибка при импорте: ' + error.message, 'error');
+                updateImportStatus(statusId, 'error', 'Ошибка импорта');
+            });
+    }
+    
+    function updateMigrationsStatus(type, message) {
+        const statusDiv = document.getElementById('migrations-status');
+        const icon = type === 'success' ? 'fa-check-circle text-green-600' : 'fa-times-circle text-red-600';
+        statusDiv.innerHTML = `
+            <div class="bg-gray-100 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas ${icon} mr-2"></i>
+                    <span class="text-sm text-gray-700">${message}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    function updateImportStatus(statusId, type, message) {
+        const statusDiv = document.getElementById(statusId);
+        const icon = type === 'success' ? 'fa-check-circle text-green-600' : 'fa-times-circle text-red-600';
+        statusDiv.innerHTML = `
+            <div class="bg-gray-100 rounded-lg p-4">
+                <div class="flex items-center">
+                    <i class="fas ${icon} mr-2"></i>
+                    <span class="text-sm text-gray-700">${message}</span>
+                </div>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

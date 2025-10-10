@@ -6,12 +6,16 @@ import os
 import sys
 import json
 import sqlite3
+import subprocess
+import threading
+import time
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 import psycopg2
 from psycopg2 import sql
 import redis
 import requests
+from server_setup import ServerSetup
 
 app = Flask(__name__)
 app.secret_key = 'installer-secret-key-change-in-production'
@@ -50,6 +54,61 @@ class InstallerConfig:
         self.save_config()
 
 config = InstallerConfig()
+
+# Глобальная переменная для отслеживания процесса установки
+installation_status = {
+    "running": False,
+    "current_step": "",
+    "progress": 0,
+    "total_steps": 0,
+    "logs": [],
+    "completed": False,
+    "error": None
+}
+
+def log_message(message):
+    """Добавление сообщения в лог установки"""
+    timestamp = time.strftime("%H:%M:%S")
+    log_entry = f"[{timestamp}] {message}"
+    installation_status["logs"].append(log_entry)
+    print(log_entry)
+
+def run_installation():
+    """Запуск установки в отдельном потоке"""
+    global installation_status
+    
+    try:
+        installation_status["running"] = True
+        installation_status["completed"] = False
+        installation_status["error"] = None
+        installation_status["logs"] = []
+        
+        log_message("🚀 Начинаем автоматическую настройку сервера...")
+        
+        # Создаем экземпляр ServerSetup
+        server_setup = ServerSetup(config.config)
+        
+        # Запускаем полную настройку
+        results = server_setup.run_full_setup()
+        
+        # Обновляем статус
+        successful_steps = sum(1 for success in results.values() if success)
+        total_steps = len(results)
+        
+        installation_status["progress"] = 100
+        installation_status["running"] = False
+        
+        if successful_steps == total_steps:
+            installation_status["completed"] = True
+            log_message("🎉 Установка завершена успешно!")
+        else:
+            installation_status["error"] = f"Установка завершена с ошибками: {successful_steps}/{total_steps} шагов выполнено успешно"
+            log_message(f"⚠️ {installation_status['error']}")
+            
+    except Exception as e:
+        installation_status["running"] = False
+        installation_status["error"] = str(e)
+        log_message(f"❌ Критическая ошибка: {e}")
 
 @app.route('/')
 def index():
@@ -218,6 +277,82 @@ def generate_config():
     
     except Exception as e:
         return jsonify({"success": False, "message": f"Ошибка генерации конфигурации: {str(e)}"})
+
+@app.route('/api/start-installation', methods=['POST'])
+def start_installation():
+    """Запуск автоматической установки"""
+    global installation_status
+    
+    if installation_status["running"]:
+        return jsonify({"success": False, "message": "Установка уже выполняется"})
+    
+    if installation_status["completed"]:
+        return jsonify({"success": False, "message": "Установка уже завершена"})
+    
+    try:
+        # Запускаем установку в отдельном потоке
+        thread = threading.Thread(target=run_installation)
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({"success": True, "message": "Установка запущена"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Ошибка запуска установки: {str(e)}"})
+
+@app.route('/api/installation-status')
+def get_installation_status():
+    """Получение статуса установки"""
+    return jsonify(installation_status)
+
+@app.route('/api/check-services', methods=['POST'])
+def check_services():
+    """Проверка состояния сервисов"""
+    try:
+        services = {
+            "postgresql": check_service_status("postgresql"),
+            "redis": check_service_status("redis-server"),
+            "nginx": check_service_status("nginx"),
+            "backend": check_service_status("ml-community-backend")
+        }
+        
+        all_running = all(services.values())
+        
+        return jsonify({
+            "success": all_running,
+            "services": services,
+            "message": "Все сервисы запущены" if all_running else "Некоторые сервисы не запущены"
+        })
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Ошибка проверки сервисов: {str(e)}"})
+
+@app.route('/api/restart-services', methods=['POST'])
+def restart_services():
+    """Перезапуск сервисов"""
+    try:
+        services = ["postgresql", "redis-server", "nginx", "ml-community-backend"]
+        
+        for service in services:
+            subprocess.run(f"systemctl restart {service}", shell=True, check=True)
+        
+        return jsonify({"success": True, "message": "Сервисы перезапущены"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Ошибка перезапуска сервисов: {str(e)}"})
+
+def check_service_status(service_name):
+    """Проверка статуса сервиса"""
+    try:
+        result = subprocess.run(
+            f"systemctl is-active {service_name}", 
+            shell=True, 
+            capture_output=True, 
+            text=True
+        )
+        return result.stdout.strip() == "active"
+    except:
+        return False
 
 def check_python_version():
     """Проверка версии Python"""

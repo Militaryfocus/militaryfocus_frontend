@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Шаг 6: Завершение установки - Установщик ML Community{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="text-center mb-8">
+        <div class="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-rocket text-2xl text-green-600"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Шаг 6: Автоматическая установка</h1>
+        <p class="text-gray-600">Запустите автоматическую настройку всего сервера</p>
+    </div>
+
+    <!-- Installation Status -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Статус установки</h2>
+        
+        <div id="installation-status" class="space-y-4">
+            <div class="flex items-center justify-between">
+                <span class="text-lg font-medium text-gray-700">Готовность к установке</span>
+                <div id="readiness-status" class="flex items-center">
+                    <i class="fas fa-spinner fa-spin text-blue-600 mr-2"></i>
+                    <span class="text-sm text-gray-600">Проверка...</span>
+                </div>
+            </div>
+            
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            
+            <div id="progress-text" class="text-sm text-gray-600 text-center">
+                Готов к установке
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <button id="start-installation-btn" 
+                    class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-play mr-3"></i>
+                Запустить автоматическую установку
+            </button>
+        </div>
+    </div>
+
+    <!-- Installation Logs -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Лог установки</h2>
+        
+        <div id="installation-logs" class="bg-gray-900 text-green-400 p-4 rounded-lg h-96 overflow-y-auto font-mono text-sm">
+            <div class="text-gray-500">Ожидание запуска установки...</div>
+        </div>
+        
+        <div class="mt-4 flex justify-between">
+            <button id="clear-logs-btn" 
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                <i class="fas fa-trash mr-2"></i>
+                Очистить логи
+            </button>
+            
+            <button id="download-logs-btn" 
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                <i class="fas fa-download mr-2"></i>
+                Скачать логи
+            </button>
+        </div>
+    </div>
+
+    <!-- Services Status -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Статус сервисов</h2>
+        
+        <div id="services-status" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-database text-xl text-blue-600 mr-3"></i>
+                    <span class="font-medium">PostgreSQL</span>
+                </div>
+                <div id="postgresql-status" class="flex items-center">
+                    <i class="fas fa-spinner fa-spin text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">Проверка...</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-memory text-xl text-red-600 mr-3"></i>
+                    <span class="font-medium">Redis</span>
+                </div>
+                <div id="redis-status" class="flex items-center">
+                    <i class="fas fa-spinner fa-spin text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">Проверка...</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-globe text-xl text-green-600 mr-3"></i>
+                    <span class="font-medium">Nginx</span>
+                </div>
+                <div id="nginx-status" class="flex items-center">
+                    <i class="fas fa-spinner fa-spin text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">Проверка...</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-server text-xl text-purple-600 mr-3"></i>
+                    <span class="font-medium">Backend API</span>
+                </div>
+                <div id="backend-status" class="flex items-center">
+                    <i class="fas fa-spinner fa-spin text-gray-400 mr-2"></i>
+                    <span class="text-sm text-gray-600">Проверка...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <button id="check-services-btn" 
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                <i class="fas fa-refresh mr-2"></i>
+                Проверить сервисы
+            </button>
+            
+            <button id="restart-services-btn" 
+                    class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200 ml-4">
+                <i class="fas fa-redo mr-2"></i>
+                Перезапустить сервисы
+            </button>
+        </div>
+    </div>
+
+    <!-- Completion Status -->
+    <div id="completion-section" class="bg-white rounded-lg shadow-md p-8 mb-8 hidden">
+        <div class="text-center">
+            <div class="mx-auto h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <i class="fas fa-check text-3xl text-green-600"></i>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Установка завершена!</h2>
+            <p class="text-gray-600 mb-8">Платформа Mobile Legends Community успешно настроена и готова к работе</p>
+            
+            <div class="space-y-4">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-green-800 mb-2">Доступ к платформе:</h3>
+                    <p class="text-green-700">
+                        <strong>URL:</strong> 
+                        <a href="#" id="platform-url" class="text-blue-600 hover:underline" target="_blank">
+                            http://localhost
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-blue-800 mb-2">Данные администратора:</h3>
+                    <p class="text-blue-700">
+                        <strong>Логин:</strong> <span id="admin-username">admin</span><br>
+                        <strong>Email:</strong> <span id="admin-email">admin@example.com</span><br>
+                        <strong>Пароль:</strong> <span id="admin-password">[установленный пароль]</span>
+                    </p>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-yellow-800 mb-2">Полезные команды:</h3>
+                    <div class="text-yellow-700 font-mono text-sm">
+                        <p><strong>Мониторинг:</strong> /usr/local/bin/ml-community-monitor.sh</p>
+                        <p><strong>Логи backend:</strong> journalctl -u ml-community-backend -f</p>
+                        <p><strong>Перезапуск:</strong> systemctl restart ml-community-backend</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8">
+                <a href="#" id="open-platform-btn" 
+                   class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200">
+                    <i class="fas fa-external-link-alt mr-3"></i>
+                    Открыть платформу
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between">
+        <a href="/step/5" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Назад
+        </a>
+        
+        <button id="finish-btn" 
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed hidden">
+            <i class="fas fa-check mr-2"></i>
+            Завершить
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const startBtn = document.getElementById('start-installation-btn');
+    const logsDiv = document.getElementById('installation-logs');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const completionSection = document.getElementById('completion-section');
+    const finishBtn = document.getElementById('finish-btn');
+    const checkServicesBtn = document.getElementById('check-services-btn');
+    const restartServicesBtn = document.getElementById('restart-services-btn');
+    const clearLogsBtn = document.getElementById('clear-logs-btn');
+    const downloadLogsBtn = document.getElementById('download-logs-btn');
+    
+    let statusCheckInterval;
+    
+    // Проверка готовности к установке
+    checkReadiness();
+    
+    // Запуск установки
+    startBtn.addEventListener('click', function() {
+        showLoading(startBtn);
+        
+        axios.post('/api/start-installation')
+            .then(response => {
+                if (response.data.success) {
+                    showAlert('Установка запущена!', 'success');
+                    startStatusCheck();
+                } else {
+                    hideLoading(startBtn, '<i class="fas fa-play mr-3"></i>Запустить автоматическую установку');
+                    showAlert(response.data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading(startBtn, '<i class="fas fa-play mr-3"></i>Запустить автоматическую установку');
+                showAlert('Ошибка запуска установки: ' + error.message, 'error');
+            });
+    });
+    
+    // Проверка сервисов
+    checkServicesBtn.addEventListener('click', function() {
+        checkServices();
+    });
+    
+    // Перезапуск сервисов
+    restartServicesBtn.addEventListener('click', function() {
+        showLoading(restartServicesBtn);
+        
+        axios.post('/api/restart-services')
+            .then(response => {
+                hideLoading(restartServicesBtn, '<i class="fas fa-redo mr-2"></i>Перезапустить сервисы');
+                
+                if (response.data.success) {
+                    showAlert(response.data.message, 'success');
+                    setTimeout(checkServices, 2000);
+                } else {
+                    showAlert(response.data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading(restartServicesBtn, '<i class="fas fa-redo mr-2"></i>Перезапустить сервисы');
+                showAlert('Ошибка перезапуска сервисов: ' + error.message, 'error');
+            });
+    });
+    
+    // Очистка логов
+    clearLogsBtn.addEventListener('click', function() {
+        logsDiv.innerHTML = '<div class="text-gray-500">Логи очищены</div>';
+    });
+    
+    // Скачивание логов
+    downloadLogsBtn.addEventListener('click', function() {
+        const logs = logsDiv.textContent;
+        const blob = new Blob([logs], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ml-community-installation.log';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    });
+    
+    function checkReadiness() {
+        // Проверяем, что все предыдущие шаги выполнены
+        const requiredSteps = ['system', 'database', 'redis', 'admin'];
+        const allReady = requiredSteps.every(step => {
+            // Здесь должна быть проверка через API
+            return true; // Временно всегда true
+        });
+        
+        if (allReady) {
+            document.getElementById('readiness-status').innerHTML = 
+                '<i class="fas fa-check-circle text-green-500 mr-2"></i><span class="text-sm text-green-600">Готов к установке</span>';
+            startBtn.disabled = false;
+        } else {
+            document.getElementById('readiness-status').innerHTML = 
+                '<i class="fas fa-times-circle text-red-500 mr-2"></i><span class="text-sm text-red-600">Не готов к установке</span>';
+            startBtn.disabled = true;
+        }
+    }
+    
+    function startStatusCheck() {
+        statusCheckInterval = setInterval(checkInstallationStatus, 2000);
+    }
+    
+    function checkInstallationStatus() {
+        axios.get('/api/installation-status')
+            .then(response => {
+                const status = response.data;
+                
+                // Обновляем прогресс
+                progressBar.style.width = status.progress + '%';
+                progressText.textContent = `Прогресс: ${status.progress}%`;
+                
+                // Обновляем логи
+                if (status.logs && status.logs.length > 0) {
+                    logsDiv.innerHTML = status.logs.map(log => 
+                        `<div>${log}</div>`
+                    ).join('');
+                    logsDiv.scrollTop = logsDiv.scrollHeight;
+                }
+                
+                // Проверяем завершение
+                if (status.completed) {
+                    clearInterval(statusCheckInterval);
+                    showInstallationComplete();
+                } else if (status.error) {
+                    clearInterval(statusCheckInterval);
+                    showInstallationError(status.error);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка проверки статуса:', error);
+            });
+    }
+    
+    function showInstallationComplete() {
+        completionSection.classList.remove('hidden');
+        finishBtn.classList.remove('hidden');
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<i class="fas fa-check mr-3"></i>Установка завершена';
+        
+        // Обновляем данные администратора
+        const adminConfig = {{ config.config.get('admin', {}) | tojson }};
+        if (adminConfig.username) {
+            document.getElementById('admin-username').textContent = adminConfig.username;
+        }
+        if (adminConfig.email) {
+            document.getElementById('admin-email').textContent = adminConfig.email;
+        }
+        
+        // Проверяем сервисы
+        checkServices();
+    }
+    
+    function showInstallationError(error) {
+        logsDiv.innerHTML += `<div class="text-red-400">❌ Ошибка: ${error}</div>`;
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i class="fas fa-redo mr-3"></i>Повторить установку';
+    }
+    
+    function checkServices() {
+        axios.post('/api/check-services')
+            .then(response => {
+                const services = response.data.services;
+                
+                updateServiceStatus('postgresql', services.postgresql);
+                updateServiceStatus('redis', services.redis);
+                updateServiceStatus('nginx', services.nginx);
+                updateServiceStatus('backend', services.backend);
+            })
+            .catch(error => {
+                console.error('Ошибка проверки сервисов:', error);
+            });
+    }
+    
+    function updateServiceStatus(serviceName, isRunning) {
+        const statusDiv = document.getElementById(serviceName + '-status');
+        if (isRunning) {
+            statusDiv.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-2"></i><span class="text-sm text-green-600">Запущен</span>';
+        } else {
+            statusDiv.innerHTML = '<i class="fas fa-times-circle text-red-500 mr-2"></i><span class="text-sm text-red-600">Остановлен</span>';
+        }
+    }
+    
+    // Проверяем сервисы при загрузке
+    checkServices();
+});
+</script>
+{% endblock %}
