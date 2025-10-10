@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Шаг 4: Создание администратора - Установщик ML Community{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-8">
+        <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-user-shield text-2xl text-blue-600"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Шаг 4: Создание администратора</h1>
+        <p class="text-gray-600">Создайте первого пользователя с правами администратора</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Данные администратора</h2>
+        
+        <form id="admin-form">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Имя пользователя *</label>
+                    <input type="text" id="username" name="username" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="admin">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="admin@example.com">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Пароль *</label>
+                    <input type="password" id="password" name="password" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Минимум 8 символов">
+                </div>
+                
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">Подтверждение пароля *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Повторите пароль">
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <label for="ign" class="block text-sm font-medium text-gray-700 mb-2">Игровое имя (IGN) - необязательно</label>
+                <input type="text" id="ign" name="ign"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       placeholder="Ваше имя в Mobile Legends">
+            </div>
+            
+            <div class="mt-6">
+                <label for="current_rank" class="block text-sm font-medium text-gray-700 mb-2">Текущий ранг - необязательно</label>
+                <select id="current_rank" name="current_rank"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Выберите ранг</option>
+                    <option value="Warrior">Warrior</option>
+                    <option value="Elite">Elite</option>
+                    <option value="Master">Master</option>
+                    <option value="Grandmaster">Grandmaster</option>
+                    <option value="Epic">Epic</option>
+                    <option value="Legend">Legend</option>
+                    <option value="Mythic">Mythic</option>
+                    <option value="Mythical Glory">Mythical Glory</option>
+                </select>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button type="button" id="create-admin-btn" 
+                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Создать администратора
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800">Важно!</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                    <p>Запомните данные администратора! Они понадобятся для входа в систему:</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>Используйте надежный пароль (минимум 8 символов)</li>
+                        <li>Email будет использоваться для восстановления пароля</li>
+                        <li>Администратор имеет полные права в системе</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between">
+        <a href="/step/3" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Назад
+        </a>
+        
+        <button id="next-btn" 
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+            <i class="fas fa-arrow-right mr-2"></i>
+            Далее
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const createBtn = document.getElementById('create-admin-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const form = document.getElementById('admin-form');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    // Проверка совпадения паролей
+    function validatePasswords() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Пароли не совпадают');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    password.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+    
+    createBtn.addEventListener('click', function() {
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        validatePasswords();
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        
+        showLoading(createBtn);
+        
+        axios.post('/api/create-admin', data)
+            .then(response => {
+                hideLoading(createBtn, '<i class="fas fa-user-plus mr-2"></i>Создать администратора');
+                
+                if (response.data.success) {
+                    showAlert(response.data.message, 'success');
+                    nextBtn.disabled = false;
+                } else {
+                    showAlert(response.data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading(createBtn, '<i class="fas fa-user-plus mr-2"></i>Создать администратора');
+                showAlert('Ошибка при создании администратора: ' + error.message, 'error');
+            });
+    });
+    
+    nextBtn.addEventListener('click', function() {
+        window.location.href = '/step/5';
+    });
+});
+</script>
+{% endblock %}

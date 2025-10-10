@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Шаг 1: Системные требования - Установщик ML Community{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="text-center mb-8">
+        <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-cogs text-2xl text-blue-600"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Шаг 1: Проверка системных требований</h1>
+        <p class="text-gray-600">Проверим наличие всех необходимых компонентов для работы платформы</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Проверка компонентов</h2>
+        
+        <div id="requirements-list" class="space-y-4">
+            <!-- Требования будут загружены через JavaScript -->
+        </div>
+        
+        <div class="mt-8 text-center">
+            <button id="check-requirements-btn" 
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                <i class="fas fa-search mr-2"></i>
+                Проверить требования
+            </button>
+        </div>
+    </div>
+
+    <div class="flex justify-between">
+        <a href="/" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Назад
+        </a>
+        
+        <button id="next-btn" 
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+            <i class="fas fa-arrow-right mr-2"></i>
+            Далее
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkBtn = document.getElementById('check-requirements-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const requirementsList = document.getElementById('requirements-list');
+    
+    checkBtn.addEventListener('click', function() {
+        showLoading(checkBtn);
+        
+        axios.post('/api/check-requirements')
+            .then(response => {
+                hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить требования');
+                
+                if (response.data.success) {
+                    showAlert('Все требования выполнены!', 'success');
+                    nextBtn.disabled = false;
+                    displayRequirements(response.data.requirements, true);
+                } else {
+                    showAlert('Некоторые требования не выполнены', 'warning');
+                    displayRequirements(response.data.requirements, false);
+                }
+            })
+            .catch(error => {
+                hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить требования');
+                showAlert('Ошибка при проверке требований: ' + error.message, 'error');
+            });
+    });
+    
+    nextBtn.addEventListener('click', function() {
+        window.location.href = '/step/2';
+    });
+    
+    function displayRequirements(requirements, allPassed) {
+        const requirementsData = [
+            { key: 'python', name: 'Python 3.8+', icon: 'fab fa-python' },
+            { key: 'pip', name: 'pip', icon: 'fas fa-box' },
+            { key: 'node', name: 'Node.js 16+', icon: 'fab fa-node-js' },
+            { key: 'npm', name: 'npm 8+', icon: 'fas fa-package' },
+            { key: 'postgresql', name: 'PostgreSQL 12+', icon: 'fas fa-database' },
+            { key: 'redis', name: 'Redis 6+', icon: 'fas fa-memory' },
+            { key: 'disk_space', name: 'Свободное место (1GB+)', icon: 'fas fa-hdd' },
+            { key: 'memory', name: 'Память (1GB+)', icon: 'fas fa-memory' }
+        ];
+        
+        requirementsList.innerHTML = requirementsData.map(req => {
+            const status = requirements[req.key];
+            return `
+                <div class="flex items-center justify-between p-4 rounded-lg ${status ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
+                    <div class="flex items-center">
+                        <i class="${req.icon} text-xl ${status ? 'text-green-600' : 'text-red-600'} mr-4"></i>
+                        <span class="text-lg font-medium ${status ? 'text-green-900' : 'text-red-900'}">${req.name}</span>
+                    </div>
+                    <div class="flex items-center">
+                        ${status ? 
+                            '<i class="fas fa-check-circle text-green-500 text-xl"></i>' : 
+                            '<i class="fas fa-times-circle text-red-500 text-xl"></i>'
+                        }
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+});
+</script>
+{% endblock %}
