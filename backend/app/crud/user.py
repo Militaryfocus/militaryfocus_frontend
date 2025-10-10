@@ -44,7 +44,7 @@ def update_user(db: Session, user_id: int, user_update: UserUpdate) -> Optional[
     if not db_user:
         return None
     
-    update_data = user_update.dict(exclude_unset=True)
+    update_data = user_update.model_dump(exclude_unset=True)
     
     # Если обновляется пароль, нужно его захешировать
     if "password" in update_data:
@@ -79,9 +79,20 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
 
 def get_current_user(token: str, db: Session) -> Optional[User]:
     """Получить текущего пользователя по токену"""
-    # Эта функция будет использоваться в dependencies
-    # Реальная логика находится в core/security.py
-    pass
+    from app.core.security import verify_token
+    from fastapi import HTTPException, status
+    
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    username = verify_token(token, credentials_exception)
+    user = get_user_by_username(db, username=username)
+    if user is None:
+        raise credentials_exception
+    return user
 
 def get_user_stats(db: Session) -> dict:
     """Получить статистику пользователей"""

@@ -1,114 +1,13 @@
-import React from 'react';
-
-const HeroesPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Герои</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const HeroDetailPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Детали героя</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const GuidesPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Гайды</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const GuideDetailPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Детали гайда</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const GuideBuilderPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Создание гайда</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const NewsPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Новости</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const NewsDetailPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Детали новости</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const RegisterPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Регистрация</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const ProfilePage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Профиль</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const SearchPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Поиск</h1>
-      <p className="text-xl text-gray-600">Страница в разработке</p>
-    </div>
-  );
-};
-
-const NotFoundPage: React.FC = () => {
-  return (
-    <div className="text-center py-16">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
-      <p className="text-xl text-gray-600">Страница не найдена</p>
-    </div>
-  );
-};
-
-export {
-  HeroesPage,
-  HeroDetailPage,
-  GuidesPage,
-  GuideDetailPage,
-  GuideBuilderPage,
-  NewsPage,
-  NewsDetailPage,
-  RegisterPage,
-  ProfilePage,
-  SearchPage,
-  NotFoundPage
-};
+export { default as HomePage } from './HomePage';
+export { default as HeroesPage } from './HeroesPage';
+export { default as HeroDetailPage } from './HeroDetailPage';
+export { default as GuidesPage } from './GuidesPage';
+export { default as GuideDetailPage } from './GuideDetailPage';
+export { default as GuideBuilderPage } from './GuideBuilderPage';
+export { default as NewsPage } from './NewsPage';
+export { default as NewsDetailPage } from './NewsDetailPage';
+export { default as LoginPage } from './LoginPage';
+export { default as RegisterPage } from './RegisterPage';
+export { default as ProfilePage } from './ProfilePage';
+export { default as SearchPage } from './SearchPage';
+export { default as NotFoundPage } from './NotFoundPage';
