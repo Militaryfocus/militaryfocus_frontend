@@ -32,7 +32,7 @@ def get_heroes(
 
 def create_hero(db: Session, hero: HeroCreate) -> Hero:
     """Создать нового героя"""
-    db_hero = Hero(**hero.dict())
+    db_hero = Hero(**hero.model_dump())
     db.add(db_hero)
     db.commit()
     db.refresh(db_hero)
@@ -44,7 +44,7 @@ def update_hero(db: Session, hero_id: int, hero_update: HeroUpdate) -> Optional[
     if not db_hero:
         return None
     
-    update_data = hero_update.dict(exclude_unset=True)
+    update_data = hero_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_hero, field, value)
     

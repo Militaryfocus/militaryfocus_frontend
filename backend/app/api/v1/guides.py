@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.models import BuildGuide, User
 from app.schemas.guide import GuideResponse, GuideCreate, GuideUpdate, GuideDetail
 from app.crud import guide as guide_crud
-from app.api.deps import get_current_user
+from app.core.security import get_current_user
 
 router = APIRouter()
 

@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.models import News, User
 from app.schemas.news import NewsResponse, NewsCreate, NewsUpdate, NewsDetail
 from app.crud import news as news_crud
-from app.api.deps import get_current_user, get_current_admin_user
+from app.core.security import get_current_user, get_current_admin_user
 
 router = APIRouter()
 

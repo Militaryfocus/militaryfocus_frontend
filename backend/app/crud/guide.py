@@ -41,7 +41,7 @@ def get_guides(
 
 def create_guide(db: Session, guide: GuideCreate, author_id: int) -> BuildGuide:
     """Создать новый гайд"""
-    guide_data = guide.dict()
+    guide_data = guide.model_dump()
     guide_data["author_id"] = author_id
     
     db_guide = BuildGuide(**guide_data)
@@ -56,7 +56,7 @@ def update_guide(db: Session, guide_id: int, guide_update: GuideUpdate) -> Optio
     if not db_guide:
         return None
     
-    update_data = guide_update.dict(exclude_unset=True)
+    update_data = guide_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_guide, field, value)
     
@@ -192,6 +192,19 @@ def get_user_guides(db: Session, user_id: int, skip: int = 0, limit: int = 20) -
         .filter(BuildGuide.author_id == user_id)
         .order_by(desc(BuildGuide.created_at))
         .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+def search_guides(db: Session, query: str, limit: int = 10) -> List[BuildGuide]:
+    """Поиск гайдов по заголовку или описанию"""
+    return (
+        db.query(BuildGuide)
+        .filter(
+            BuildGuide.is_published == True,
+            BuildGuide.title.ilike(f"%{query}%") | BuildGuide.description.ilike(f"%{query}%")
+        )
+        .order_by(desc(BuildGuide.rating))
         .limit(limit)
         .all()
     )

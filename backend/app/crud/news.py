@@ -1,22 +1,22 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc, distinct
+from sqlalchemy import func, desc
 from typing import List, Optional
 from app.models import News
 from app.schemas.news import NewsCreate, NewsUpdate
 
-def get_news(db: Session, news_id: int) -> Optional[News]:
-    """Получить новость по ID"""
-    return db.query(News).filter(News.id == news_id).first()
-
-def get_news_list(
+def get_news(
     db: Session,
+    news_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 20,
     category: Optional[str] = None,
     featured: Optional[bool] = None
 ) -> List[News]:
-    """Получить список новостей с фильтрацией"""
-    query = db.query(News).filter(News.is_published == True)
+    """Получить новости с фильтрацией"""
+    if news_id:
+        return db.query(News).filter(News.id == news_id).first()
+    
+    query = db.query(News)
     
     if category:
         query = query.filter(News.category == category)
@@ -24,11 +24,11 @@ def get_news_list(
     if featured is not None:
         query = query.filter(News.is_featured == featured)
     
-    return query.order_by(desc(News.created_at)).offset(skip).limit(limit).all()
+    return query.filter(News.is_published == True).order_by(desc(News.created_at)).offset(skip).limit(limit).all()
 
 def create_news(db: Session, news: NewsCreate, author_id: int) -> News:
     """Создать новую новость"""
-    news_data = news.dict()
+    news_data = news.model_dump()
     news_data["author_id"] = author_id
     
     db_news = News(**news_data)
@@ -39,11 +39,11 @@ def create_news(db: Session, news: NewsCreate, author_id: int) -> News:
 
 def update_news(db: Session, news_id: int, news_update: NewsUpdate) -> Optional[News]:
     """Обновить новость"""
-    db_news = get_news(db, news_id)
+    db_news = get_news(db=db, news_id=news_id)
     if not db_news:
         return None
     
-    update_data = news_update.dict(exclude_unset=True)
+    update_data = news_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_news, field, value)
     
@@ -53,7 +53,7 @@ def update_news(db: Session, news_id: int, news_update: NewsUpdate) -> Optional[
 
 def delete_news(db: Session, news_id: int) -> bool:
     """Удалить новость"""
-    db_news = get_news(db, news_id)
+    db_news = get_news(db=db, news_id=news_id)
     if not db_news:
         return False
     
@@ -63,7 +63,7 @@ def delete_news(db: Session, news_id: int) -> bool:
 
 def increment_views(db: Session, news_id: int) -> bool:
     """Увеличить счетчик просмотров"""
-    db_news = get_news(db, news_id)
+    db_news = get_news(db=db, news_id=news_id)
     if not db_news:
         return False
     
@@ -93,29 +93,17 @@ def get_latest_news(db: Session, limit: int = 10) -> List[News]:
 
 def get_news_categories(db: Session) -> List[str]:
     """Получить список категорий новостей"""
-    categories = db.query(distinct(News.category)).filter(News.category.isnot(None)).all()
-    return [category[0] for category in categories]
+    categories = db.query(News.category).filter(News.category.isnot(None)).distinct().all()
+    return [cat[0] for cat in categories if cat[0]]
 
-def search_news(db: Session, query: str, limit: int = 20) -> List[News]:
-    """Поиск новостей"""
+def search_news(db: Session, query: str, limit: int = 10) -> List[News]:
+    """Поиск новостей по заголовку или содержанию"""
     return (
         db.query(News)
         .filter(
             News.is_published == True,
-            News.title.ilike(f"%{query}%") | 
-            News.content.ilike(f"%{query}%") |
-            News.summary.ilike(f"%{query}%")
+            News.title.ilike(f"%{query}%") | News.content.ilike(f"%{query}%")
         )
-        .order_by(desc(News.created_at))
-        .limit(limit)
-        .all()
-    )
-
-def get_news_by_category(db: Session, category: str, limit: int = 10) -> List[News]:
-    """Получить новости по категории"""
-    return (
-        db.query(News)
-        .filter(News.category == category, News.is_published == True)
         .order_by(desc(News.created_at))
         .limit(limit)
         .all()
@@ -130,14 +118,11 @@ def get_news_stats(db: Session) -> dict:
     # Статистика по категориям
     category_stats = {}
     categories = db.query(News.category, func.count(News.id)).group_by(News.category).all()
-    for category, count in categories:
-        if category:
-            category_stats[category] = count
+    for cat, count in categories:
+        if cat:
+            category_stats[cat] = count
     
-    # Общее количество просмотров
-    total_views = db.query(func.sum(News.views)).scalar() or 0
-    
-    # Среднее количество просмотров на новость
+    # Среднее количество просмотров
     avg_views = db.query(func.avg(News.views)).scalar() or 0.0
     
     # Самые популярные новости
@@ -154,7 +139,6 @@ def get_news_stats(db: Session) -> dict:
         "published_news": published_news,
         "featured_news": featured_news,
         "news_by_category": category_stats,
-        "total_views": total_views,
-        "avg_views_per_news": float(avg_views),
-        "most_popular_news": [news[0] for news in most_popular]
+        "avg_views": float(avg_views),
+        "most_popular": [news[0] for news in most_popular]
     }

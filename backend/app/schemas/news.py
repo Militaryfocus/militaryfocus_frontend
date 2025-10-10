@@ -36,22 +36,13 @@ class NewsResponse(NewsBase):
         from_attributes = True
 
 class NewsDetail(NewsResponse):
-    """Детальная информация о новости"""
+    """Детальная информация о новости с дополнительными данными"""
     author_name: Optional[str] = None
-    reading_time: Optional[int] = None  # в минутах
 
 class NewsStats(BaseModel):
     total_news: int
     published_news: int
     featured_news: int
     news_by_category: Dict[str, int]
-    total_views: int
-    avg_views_per_news: float
-    most_popular_news: List[str]
-
-class NewsSearch(BaseModel):
-    query: str
-    category: Optional[str] = None
-    tags: Optional[List[str]] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
+    avg_views: float
+    most_popular: List[str]
