@@ -6,16 +6,12 @@ from app.schemas.news import NewsCreate, NewsUpdate
 
 def get_news(
     db: Session,
-    news_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 20,
     category: Optional[str] = None,
     featured: Optional[bool] = None
 ) -> List[News]:
     """Получить новости с фильтрацией"""
-    if news_id:
-        return db.query(News).filter(News.id == news_id).first()
-    
     query = db.query(News)
     
     if category:
@@ -25,6 +21,10 @@ def get_news(
         query = query.filter(News.is_featured == featured)
     
     return query.filter(News.is_published == True).order_by(desc(News.created_at)).offset(skip).limit(limit).all()
+
+def get_news_by_id(db: Session, news_id: int) -> Optional[News]:
+    """Получить новость по ID"""
+    return db.query(News).filter(News.id == news_id).first()
 
 def create_news(db: Session, news: NewsCreate, author_id: int) -> News:
     """Создать новую новость"""

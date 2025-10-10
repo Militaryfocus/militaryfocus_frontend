@@ -85,13 +85,41 @@ async def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Здесь можно добавить подсчет статистики пользователя
+    # Получаем реальную статистику пользователя
+    from app.models import BuildGuide
+    from sqlalchemy import func
+    
+    # Подсчет гайдов пользователя
+    guides_count = db.query(func.count(BuildGuide.id)).filter(
+        BuildGuide.author_id == user_id,
+        BuildGuide.is_published == True
+    ).scalar() or 0
+    
+    # Подсчет общего количества просмотров
+    total_views = db.query(func.sum(BuildGuide.views)).filter(
+        BuildGuide.author_id == user_id,
+        BuildGuide.is_published == True
+    ).scalar() or 0
+    
+    # Подсчет общего количества лайков
+    total_likes = db.query(func.sum(BuildGuide.likes)).filter(
+        BuildGuide.author_id == user_id,
+        BuildGuide.is_published == True
+    ).scalar() or 0
+    
+    # Средний рейтинг гайдов
+    average_rating = db.query(func.avg(BuildGuide.rating)).filter(
+        BuildGuide.author_id == user_id,
+        BuildGuide.is_published == True,
+        BuildGuide.rating > 0
+    ).scalar() or 0.0
+    
     return {
         "user_id": user_id,
-        "guides_count": 0,  # Заглушка
-        "total_views": 0,   # Заглушка
-        "total_likes": 0,   # Заглушка
-        "average_rating": 0.0  # Заглушка
+        "guides_count": guides_count,
+        "total_views": total_views,
+        "total_likes": total_likes,
+        "average_rating": round(float(average_rating), 2)
     }
 
 @router.get("/stats/overview", response_model=UserStats)

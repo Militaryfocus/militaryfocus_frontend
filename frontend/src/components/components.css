@@ -1,0 +1,232 @@
+/* Hero Card Styles */
+.hero-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer;
+}
+
+.hero-image {
+  @apply relative h-48 overflow-hidden;
+}
+
+.hero-role {
+  @apply absolute top-2 left-2 text-white px-2 py-1 rounded text-xs font-semibold;
+}
+
+.hero-info {
+  @apply p-4;
+}
+
+.hero-name {
+  @apply text-lg font-bold text-gray-900;
+}
+
+.hero-specialty {
+  @apply text-sm text-gray-600;
+}
+
+.hero-stats {
+  @apply space-y-2;
+}
+
+.stat {
+  @apply mb-2;
+}
+
+.stat-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.stat-fill {
+  @apply h-2 rounded-full transition-all duration-300;
+}
+
+.stat-durability {
+  @apply bg-blue-500;
+}
+
+.stat-offense {
+  @apply bg-red-500;
+}
+
+.stat-control {
+  @apply bg-purple-500;
+}
+
+/* Guide Card Styles */
+.guide-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300;
+}
+
+.guide-header {
+  @apply p-6;
+}
+
+.guide-content {
+  @apply px-6 pb-4;
+}
+
+.guide-footer {
+  @apply p-6 pt-0 flex gap-2;
+}
+
+.rating-stars {
+  @apply flex items-center;
+}
+
+.tag {
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.tag-meta {
+  @apply bg-gray-100 text-gray-700;
+}
+
+/* News Card Styles */
+.news-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300;
+}
+
+/* Common Button Styles */
+.btn-primary {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 inline-block;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200 inline-block;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 inline-block;
+}
+
+/* Utility Classes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Search Modal Styles */
+.search-modal {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.search-modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-96 overflow-hidden;
+}
+
+.search-input {
+  @apply w-full px-4 py-3 text-lg border-0 focus:outline-none focus:ring-0;
+}
+
+.search-results {
+  @apply max-h-64 overflow-y-auto;
+}
+
+.search-result-item {
+  @apply p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0;
+}
+
+/* Layout Styles */
+.layout {
+  @apply min-h-screen bg-gray-50;
+}
+
+.layout-header {
+  @apply bg-white shadow-sm border-b;
+}
+
+.layout-main {
+  @apply flex-1;
+}
+
+.layout-sidebar {
+  @apply w-64 bg-white shadow-sm;
+}
+
+.layout-content {
+  @apply flex-1 p-6;
+}
+
+/* Form Styles */
+.form-group {
+  @apply mb-4;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.form-textarea {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical;
+}
+
+.form-select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.form-error {
+  @apply text-red-600 text-sm mt-1;
+}
+
+/* Loading States */
+.loading {
+  @apply animate-pulse;
+}
+
+.loading-skeleton {
+  @apply bg-gray-200 rounded;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-card {
+    @apply mx-2;
+  }
+  
+  .guide-card {
+    @apply mx-2;
+  }
+  
+  .news-card {
+    @apply mx-2;
+  }
+  
+  .layout-sidebar {
+    @apply hidden;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .hero-card {
+    @apply bg-gray-800 text-white;
+  }
+  
+  .guide-card {
+    @apply bg-gray-800 text-white;
+  }
+  
+  .news-card {
+    @apply bg-gray-800 text-white;
+  }
+  
+  .hero-name {
+    @apply text-white;
+  }
+  
+  .hero-specialty {
+    @apply text-gray-300;
+  }
+}

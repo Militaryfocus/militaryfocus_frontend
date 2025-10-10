@@ -18,6 +18,7 @@ import ProfilePage from '@/pages/ProfilePage';
 import SearchPage from '@/pages/SearchPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import './App.css';
+import './components/components.css';
 
 // Создаем QueryClient для React Query
 const queryClient = new QueryClient({

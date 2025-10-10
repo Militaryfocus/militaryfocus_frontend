@@ -132,6 +132,9 @@ def like_guide(db: Session, guide_id: int, user_id: int) -> dict:
     if not guide:
         return {"error": "Guide not found"}
     
+    # Проверить, не лайкал ли пользователь уже этот гайд
+    # В реальном приложении здесь должна быть таблица лайков
+    # Пока что просто увеличиваем счетчик
     guide.likes += 1
     db.commit()
     

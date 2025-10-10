@@ -39,7 +39,7 @@ async def create_news(
 @router.get("/{news_id}", response_model=NewsDetail)
 async def get_news_detail(news_id: int, db: Session = Depends(get_db)):
     """Получить детальную информацию о новости"""
-    news = news_crud.get_news(db=db, news_id=news_id)
+    news = news_crud.get_news_by_id(db=db, news_id=news_id)
     if not news:
         raise HTTPException(status_code=404, detail="News not found")
     

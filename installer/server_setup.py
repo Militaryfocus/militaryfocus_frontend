@@ -206,7 +206,7 @@ def create_admin():
         print("Администратор создан успешно")
         
     except Exception as e:
-        print(f"Ошибка создания администратора: {{e}}")
+        print(f"Ошибка создания администратора: {e}")
         db.rollback()
     finally:
         db.close()

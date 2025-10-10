@@ -1,17 +1,35 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 class GuideBase(BaseModel):
-    title: str
-    description: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=2000)
     emblems: Optional[Dict[str, Any]] = None
-    battle_spell: Optional[str] = None
+    battle_spell: Optional[str] = Field(None, max_length=100)
     item_build: Optional[Dict[str, Any]] = None
     skill_priority: Optional[List[int]] = None
-    play_style: Optional[str] = None
-    difficulty: Optional[str] = None
+    play_style: Optional[str] = Field(None, max_length=50)
+    difficulty: Optional[str] = Field(None, max_length=20)
     tags: Optional[List[str]] = None
+    
+    @validator('difficulty')
+    def validate_difficulty(cls, v):
+        if v and v not in ['Easy', 'Medium', 'Hard']:
+            raise ValueError('Difficulty must be Easy, Medium, or Hard')
+        return v
+    
+    @validator('play_style')
+    def validate_play_style(cls, v):
+        if v and v not in ['Aggressive', 'Defensive', 'Balanced']:
+            raise ValueError('Play style must be Aggressive, Defensive, or Balanced')
+        return v
+    
+    @validator('skill_priority')
+    def validate_skill_priority(cls, v):
+        if v and len(v) > 10:
+            raise ValueError('Skill priority list too long')
+        return v
 
 class GuideCreate(GuideBase):
     hero_id: int
@@ -52,8 +70,8 @@ class GuideDetail(GuideResponse):
     comments_count: Optional[int] = None
 
 class GuideRating(BaseModel):
-    rating: int
-    review: Optional[str] = None
+    rating: int = Field(..., ge=1, le=5)
+    review: Optional[str] = Field(None, max_length=1000)
 
 class GuideComment(BaseModel):
     content: str

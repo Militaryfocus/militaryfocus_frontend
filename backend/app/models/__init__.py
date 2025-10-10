@@ -22,6 +22,7 @@ class User(Base):
     # Relationships
     guides = relationship("BuildGuide", back_populates="author")
     comments = relationship("Comment", back_populates="author")
+    news = relationship("News", back_populates="author")
 
 class Hero(Base):
     __tablename__ = "heroes"
@@ -209,4 +210,4 @@ class News(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
-    author = relationship("User")
+    author = relationship("User", back_populates="news")

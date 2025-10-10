@@ -1,5 +1,5 @@
 from typing import List, Union
-from pydantic import BaseSettings, validator
+from pydantic import BaseSettings, validator, Field
 import os
 
 class Settings(BaseSettings):
@@ -10,9 +10,9 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://redis:6379"
     
     # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production"
+    SECRET_KEY: str = Field(default="your-secret-key-change-in-production", min_length=32)
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, ge=1, le=1440)
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8001", "http://127.0.0.1:3000", "http://127.0.0.1:8001"]
@@ -24,6 +24,12 @@ class Settings(BaseSettings):
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
+    
+    @validator("SECRET_KEY")
+    def validate_secret_key(cls, v):
+        if len(v) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters long")
+        return v
     
     # File Upload
     MAX_FILE_SIZE: int = 10485760  # 10MB
