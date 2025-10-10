@@ -7,11 +7,9 @@ from app.core.config import settings
 from app.models import User
 from app.schemas.user import UserCreate, UserResponse, Token
 from app.crud import user as user_crud
-from app.core.security import verify_password, create_access_token, get_password_hash
+from app.core.security import verify_password, create_access_token, get_password_hash, oauth2_scheme, get_current_user
 
 router = APIRouter()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 @router.post("/register", response_model=UserResponse)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -57,12 +55,12 @@ async def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: User = Depends(user_crud.get_current_user)):
+async def read_users_me(current_user: User = Depends(get_current_user)):
     """Получить информацию о текущем пользователе"""
     return current_user
 
 @router.post("/refresh", response_model=Token)
-async def refresh_token(current_user: User = Depends(user_crud.get_current_user)):
+async def refresh_token(current_user: User = Depends(get_current_user)):
     """Обновить токен доступа"""
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(

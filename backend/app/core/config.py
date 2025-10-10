@@ -1,6 +1,6 @@
 from typing import List, Union
 from pydantic_settings import BaseSettings
-from pydantic import validator, Field
+from pydantic import field_validator, Field
 import os
 
 class Settings(BaseSettings):
@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8001", "http://127.0.0.1:3000", "http://127.0.0.1:8001"]
     
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -26,7 +27,8 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
     
-    @validator("SECRET_KEY")
+    @field_validator("SECRET_KEY")
+    @classmethod
     def validate_secret_key(cls, v):
         if len(v) < 32:
             raise ValueError("SECRET_KEY must be at least 32 characters long")
