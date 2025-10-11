@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Military Focus Installer
+Comment=Автоматический установщик Military Focus
+Exec=/workspace/installer/auto_start.py
+Icon=/workspace/installer/icon.png
+Path=/workspace/installer
+Terminal=false
+StartupNotify=true
+Categories=System;Setup;
+Keywords=installer;military;focus;setup;
+MimeType=
+StartupWMClass=MilitaryFocusInstaller

@@ -1,0 +1,29 @@
+[Unit]
+Description=Military Focus Installer Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/workspace/installer
+ExecStart=/usr/bin/python3 /workspace/installer/auto_start.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Переменные окружения
+Environment=PYTHONPATH=/workspace
+Environment=FLASK_APP=app.py
+Environment=FLASK_ENV=production
+
+# Безопасность
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/workspace
+
+[Install]
+WantedBy=multi-user.target

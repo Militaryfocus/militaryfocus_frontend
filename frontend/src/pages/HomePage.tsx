@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { TrendingUp, Users, BookOpen, Newspaper, Star, Eye, Heart } from 'lucide-react';
-import apiService from '@/services/api';
-import HeroCard from '@/components/Hero/HeroCard';
-import GuideCard from '@/components/Guide/GuideCard';
-import NewsCard from '@/components/News/NewsCard';
+import apiService from '../services/api';
+import HeroCard from '../components/Hero/HeroCard';
+import GuideCard from '../components/Guide/GuideCard';
+import NewsCard from '../components/News/NewsCard';
 
 const HomePage: React.FC = () => {
   // Получаем данные для главной страницы

@@ -3,42 +3,79 @@
 {% block title %}Шаг 1: Системные требования - Установщик ML Community{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-6xl mx-auto">
     <div class="text-center mb-8">
         <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-cogs text-2xl text-blue-600"></i>
         </div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Шаг 1: Проверка системных требований</h1>
-        <p class="text-gray-600">Проверим наличие всех необходимых компонентов для работы платформы</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Проверка системных требований</h1>
+        <p class="text-lg text-gray-600">Проверим наличие всех необходимых компонентов для установки</p>
     </div>
 
+    <!-- System Info -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="system-info" style="display: none;">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Информация о системе</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="system-details">
+            <!-- Системная информация будет загружена через JavaScript -->
+        </div>
+    </div>
+
+    <!-- Requirements Check -->
     <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Проверка компонентов</h2>
-        
-        <div id="requirements-list" class="space-y-4">
-            <!-- Требования будут загружены через JavaScript -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">Системные компоненты</h2>
+            <div class="flex space-x-2">
+                <button id="check-requirements-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200">
+                    <i class="fas fa-search mr-2"></i>
+                    Проверить
+                </button>
+                <button id="install-missing-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200" style="display: none;">
+                    <i class="fas fa-download mr-2"></i>
+                    Установить недостающие
+                </button>
+            </div>
         </div>
         
-        <div class="mt-8 text-center">
-            <button id="check-requirements-btn" 
-                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
-                <i class="fas fa-search mr-2"></i>
-                Проверить требования
+        <div class="space-y-3" id="requirements-list">
+            <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-info-circle text-2xl mb-2"></i>
+                <p>Нажмите "Проверить" для анализа системы</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="progress-section" style="display: none;">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Прогресс проверки</h3>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <div id="progress-text" class="text-sm text-gray-600">Готов к проверке...</div>
+        <div id="auto-redirect-section" class="mt-4 text-center" style="display: none;">
+            <button id="cancel-redirect-btn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
+                <i class="fas fa-times mr-1"></i>
+                Отменить автоматический переход
             </button>
         </div>
     </div>
 
+    <!-- Installation Logs -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="logs-section" style="display: none;">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Логи установки</h3>
+        <div id="logs-container" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
+            <!-- Логи будут загружены здесь -->
+        </div>
+    </div>
+
     <div class="flex justify-between">
-        <a href="/" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+        <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
             Назад
         </a>
         
-        <button id="next-btn" 
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled>
-            <i class="fas fa-arrow-right mr-2"></i>
+        <button id="next-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
             Далее
+            <i class="fas fa-arrow-right ml-2"></i>
         </button>
     </div>
 </div>
@@ -48,65 +85,267 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const checkBtn = document.getElementById('check-requirements-btn');
+    const installBtn = document.getElementById('install-missing-btn');
     const nextBtn = document.getElementById('next-btn');
     const requirementsList = document.getElementById('requirements-list');
+    const systemInfo = document.getElementById('system-info');
+    const systemDetails = document.getElementById('system-details');
+    const progressSection = document.getElementById('progress-section');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const logsSection = document.getElementById('logs-section');
+    const logsContainer = document.getElementById('logs-container');
+    const autoRedirectSection = document.getElementById('auto-redirect-section');
+    const cancelRedirectBtn = document.getElementById('cancel-redirect-btn');
+    
+    let requirements = {};
+    let missingDependencies = [];
+    let countdownInterval = null;
     
     checkBtn.addEventListener('click', function() {
+        checkRequirements();
+    });
+    
+    installBtn.addEventListener('click', function() {
+        installMissingDependencies();
+    });
+    
+    cancelRedirectBtn.addEventListener('click', function() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        autoRedirectSection.style.display = 'none';
+        updateProgress(100, 'Проверка завершена успешно');
+        showAlert('Автоматический переход отменен', 'info');
+    });
+    
+    function checkRequirements() {
         showLoading(checkBtn);
+        progressSection.style.display = 'block';
+        updateProgress(0, 'Начинаем проверку...');
         
+        // Сначала загружаем системную информацию
+        axios.get('/api/system-info')
+            .then(response => {
+                displaySystemInfo(response.data);
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки системной информации:', error);
+            });
+        
+        // Затем проверяем требования
         axios.post('/api/check-requirements')
             .then(response => {
-                hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить требования');
+                hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить');
+                requirements = response.data.requirements;
+                
+                displayRequirements(requirements);
                 
                 if (response.data.success) {
-                    showAlert('Все требования выполнены!', 'success');
+                    showAlert('Все критические требования выполнены! Переходим к следующему шагу...', 'success');
                     nextBtn.disabled = false;
-                    displayRequirements(response.data.requirements, true);
+                    updateProgress(100, 'Проверка завершена успешно');
+                    
+                    // Показываем обратный отсчет
+                    autoRedirectSection.style.display = 'block';
+                    let countdown = 3;
+                    countdownInterval = setInterval(() => {
+                        updateProgress(100, `Переход к следующему шагу через ${countdown} сек...`);
+                        countdown--;
+                        if (countdown < 0) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                            window.location.href = '/step/2';
+                        }
+                    }, 1000);
                 } else {
-                    showAlert('Некоторые требования не выполнены', 'warning');
-                    displayRequirements(response.data.requirements, false);
+                    showAlert('Некоторые критические требования не выполнены.', 'warning');
+                    missingDependencies = getMissingDependencies(requirements);
+                    if (missingDependencies.length > 0) {
+                        installBtn.style.display = 'inline-flex';
+                    }
+                    updateProgress(75, 'Обнаружены недостающие компоненты');
                 }
             })
             .catch(error => {
-                hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить требования');
-                showAlert('Ошибка при проверке требований: ' + error.message, 'error');
+                hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить');
+                showAlert('Ошибка проверки требований: ' + error.message, 'error');
+                updateProgress(0, 'Ошибка проверки');
             });
-    });
+    }
+    
+    function displaySystemInfo(systemInfo) {
+        systemDetails.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Операционная система:</span>
+                    <span class="font-medium">${systemInfo.os} ${systemInfo.os_version}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Архитектура:</span>
+                    <span class="font-medium">${systemInfo.architecture}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Процессор:</span>
+                    <span class="font-medium">${systemInfo.cpu_count} ядер</span>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Python версия:</span>
+                    <span class="font-medium">${systemInfo.python_version}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Общая память:</span>
+                    <span class="font-medium">${(systemInfo.memory_total / 1024**3).toFixed(1)} GB</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Свободное место:</span>
+                    <span class="font-medium">${(systemInfo.disk_free / 1024**3).toFixed(1)} GB</span>
+                </div>
+            </div>
+        `;
+        systemInfo.style.display = 'block';
+    }
+    
+    function displayRequirements(requirements) {
+        requirementsList.innerHTML = '';
+        
+        const requirementNames = {
+            'python': 'Python',
+            'pip': 'Pip',
+            'node': 'Node.js',
+            'npm': 'NPM',
+            'postgresql': 'PostgreSQL',
+            'redis': 'Redis',
+            'disk_space': 'Свободное место',
+            'memory': 'Память',
+            'git': 'Git'
+        };
+        
+        Object.entries(requirements).forEach(([name, isInstalled]) => {
+            const item = document.createElement('div');
+            const isCritical = ['python', 'pip', 'node', 'npm', 'disk_space', 'memory'].includes(name);
+            
+            item.className = `flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
+                isInstalled ? 'bg-green-50 border-green-200' : 
+                isCritical ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'
+            }`;
+            
+            const statusIcon = isInstalled ? 'fa-check-circle text-green-500' : 
+                             isCritical ? 'fa-times-circle text-red-500' : 'fa-exclamation-triangle text-yellow-500';
+            
+            const statusText = isInstalled ? 'Установлен' : 
+                             isCritical ? 'Требуется' : 'Рекомендуется';
+            
+            item.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${statusIcon} text-xl mr-3"></i>
+                    <div>
+                        <div class="font-medium text-gray-900">${requirementNames[name] || name}</div>
+                        <div class="text-sm text-gray-600">${getRequirementDescription(name)}</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-medium ${isInstalled ? 'text-green-600' : 
+                                                      isCritical ? 'text-red-600' : 'text-yellow-600'}">
+                        ${statusText}
+                    </div>
+                </div>
+            `;
+            
+            requirementsList.appendChild(item);
+        });
+    }
+    
+    function getRequirementDescription(name) {
+        const descriptions = {
+            'python': 'Версия 3.8 или выше',
+            'pip': 'Менеджер пакетов Python',
+            'node': 'Версия 16 или выше',
+            'npm': 'Менеджер пакетов Node.js',
+            'postgresql': 'База данных PostgreSQL',
+            'redis': 'Кэш-сервер Redis',
+            'disk_space': 'Минимум 1GB свободного места',
+            'memory': 'Минимум 1GB оперативной памяти',
+            'git': 'Система контроля версий'
+        };
+        return descriptions[name] || 'Системный компонент';
+    }
+    
+    function getMissingDependencies(requirements) {
+        const missing = [];
+        const installable = ['node', 'postgresql', 'redis', 'git', 'curl'];
+        
+        Object.entries(requirements).forEach(([name, info]) => {
+            if (!info.installed && installable.includes(name)) {
+                missing.push(name);
+            }
+        });
+        
+        return missing;
+    }
+    
+    function installMissingDependencies() {
+        if (missingDependencies.length === 0) return;
+        
+        showLoading(installBtn);
+        logsSection.style.display = 'block';
+        updateProgress(0, 'Начинаем установку недостающих компонентов...');
+        
+        axios.post('/api/install-requirements')
+        .then(response => {
+            hideLoading(installBtn, '<i class="fas fa-download mr-2"></i>Установить недостающие');
+            
+            if (response.data.success) {
+                showAlert('Недостающие компоненты установлены!', 'success');
+                updateProgress(100, 'Установка завершена');
+                
+                // Перепроверяем требования
+                setTimeout(() => {
+                    checkRequirements();
+                }, 2000);
+            } else {
+                showAlert('Ошибка установки: ' + response.data.message, 'error');
+                updateProgress(0, 'Ошибка установки');
+            }
+        })
+        .catch(error => {
+            hideLoading(installBtn, '<i class="fas fa-download mr-2"></i>Установить недостающие');
+            showAlert('Ошибка установки: ' + error.message, 'error');
+            updateProgress(0, 'Ошибка установки');
+        });
+    }
+    
+    function updateProgress(percent, text) {
+        progressBar.style.width = percent + '%';
+        progressText.textContent = text;
+    }
+    
+    function loadLogs() {
+        axios.get('/api/get-installation-logs')
+            .then(response => {
+                const logs = response.data.logs;
+                logsContainer.innerHTML = logs.map(log => `<div>${log}</div>`).join('');
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки логов:', error);
+            });
+    }
+    
+    // Загружаем логи каждые 2 секунды
+    setInterval(loadLogs, 2000);
+    
+    // Автоматически запускаем проверку при загрузке страницы
+    setTimeout(() => {
+        checkRequirements();
+    }, 1000);
     
     nextBtn.addEventListener('click', function() {
         window.location.href = '/step/2';
     });
-    
-    function displayRequirements(requirements, allPassed) {
-        const requirementsData = [
-            { key: 'python', name: 'Python 3.8+', icon: 'fab fa-python' },
-            { key: 'pip', name: 'pip', icon: 'fas fa-box' },
-            { key: 'node', name: 'Node.js 16+', icon: 'fab fa-node-js' },
-            { key: 'npm', name: 'npm 8+', icon: 'fas fa-package' },
-            { key: 'postgresql', name: 'PostgreSQL 12+', icon: 'fas fa-database' },
-            { key: 'redis', name: 'Redis 6+', icon: 'fas fa-memory' },
-            { key: 'disk_space', name: 'Свободное место (1GB+)', icon: 'fas fa-hdd' },
-            { key: 'memory', name: 'Память (1GB+)', icon: 'fas fa-memory' }
-        ];
-        
-        requirementsList.innerHTML = requirementsData.map(req => {
-            const status = requirements[req.key];
-            return `
-                <div class="flex items-center justify-between p-4 rounded-lg ${status ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
-                    <div class="flex items-center">
-                        <i class="${req.icon} text-xl ${status ? 'text-green-600' : 'text-red-600'} mr-4"></i>
-                        <span class="text-lg font-medium ${status ? 'text-green-900' : 'text-red-900'}">${req.name}</span>
-                    </div>
-                    <div class="flex items-center">
-                        ${status ? 
-                            '<i class="fas fa-check-circle text-green-500 text-xl"></i>' : 
-                            '<i class="fas fa-times-circle text-red-500 text-xl"></i>'
-                        }
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
 });
 </script>
 {% endblock %}
