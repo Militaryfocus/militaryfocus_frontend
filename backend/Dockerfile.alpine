@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.9-alpine
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -7,16 +7,14 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies with retry and alternative mirrors
-RUN apt-get update --fix-missing \
-    && apt-get install -y --no-install-recommends \
-        postgresql-client \
-        build-essential \
-        libpq-dev \
-        ca-certificates \
-        curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Install system dependencies
+RUN apk add --no-cache \
+    postgresql-client \
+    build-base \
+    postgresql-dev \
+    libffi-dev \
+    openssl-dev \
+    ca-certificates
 
 # Install Python dependencies
 COPY requirements.txt .
