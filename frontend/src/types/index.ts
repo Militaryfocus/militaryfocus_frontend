@@ -264,3 +264,87 @@ export interface ValidationError {
   field: string;
   message: string;
 }
+
+// API Response типы для статистики
+export interface HeroesStats {
+  total_heroes: number;
+  roles_count: Record<string, number>;
+  most_picked: string[];
+  highest_win_rate: string[];
+  avg_stats: {
+    durability: number;
+    offense: number;
+    control: number;
+    difficulty: number;
+  };
+}
+
+export interface UserStats {
+  guides_count: number;
+  total_views: number;
+  total_likes: number;
+  average_rating: number;
+  new_users_today: number;
+  new_users_this_week: number;
+}
+
+export interface GuideStats {
+  total_guides: number;
+  published_guides: number;
+  guides_by_difficulty: Record<string, number>;
+  guides_by_play_style: Record<string, number>;
+  most_popular_heroes: string[];
+  avg_rating: number;
+}
+
+export interface NewsStats {
+  total_news: number;
+  published_news: number;
+  featured_news: number;
+  news_by_category: Record<string, number>;
+  most_popular: string[];
+  avg_views: number;
+}
+
+// Search типы
+export interface SearchSuggestion {
+  id: string;
+  text: string;
+  type: 'hero' | 'guide' | 'user';
+  data?: any;
+}
+
+export interface SearchSuggestionsResponse {
+  suggestions: SearchSuggestion[];
+  total: number;
+}
+
+export interface HeroSearchResponse {
+  heroes: Hero[];
+  total: number;
+  query: string;
+}
+
+export interface GuideSearchResponse {
+  guides: BuildGuide[];
+  total: number;
+  query: string;
+}
+
+export interface UserSearchResponse {
+  users: User[];
+  total: number;
+  query: string;
+}
+
+// Health check типы
+export interface HealthCheckResponse {
+  status: 'healthy' | 'unhealthy';
+  service: string;
+  version: string;
+  message: string;
+  timestamp: string;
+  uptime: number;
+  database: 'connected' | 'disconnected';
+  redis: 'connected' | 'disconnected';
+}

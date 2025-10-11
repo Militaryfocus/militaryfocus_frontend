@@ -173,6 +173,12 @@ else
     exit 1
 fi
 
+# Создать директорию для логов
+echo "📁 Создаем директорию для логов..."
+sudo mkdir -p /var/www/www-root/data/www/militaryfocus.ru/backend/logs
+sudo chown -R www-data:www-data /var/www/www-root/data/www/militaryfocus.ru/backend/logs
+sudo chmod 755 /var/www/www-root/data/www/militaryfocus.ru/backend/logs
+
 # Создать systemd сервис для Backend
 echo "🔧 Создаем systemd сервис..."
 sudo tee /etc/systemd/system/ml-backend.service > /dev/null << 'EOF'
@@ -187,6 +193,8 @@ WorkingDirectory=/var/www/www-root/data/www/militaryfocus.ru/backend
 Environment=PATH=/var/www/www-root/data/www/militaryfocus.ru/backend/venv/bin
 ExecStart=/var/www/www-root/data/www/militaryfocus.ru/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001
 Restart=always
+StandardOutput=append:/var/www/www-root/data/www/militaryfocus.ru/backend/logs/app.log
+StandardError=append:/var/www/www-root/data/www/militaryfocus.ru/backend/logs/errors.log
 
 [Install]
 WantedBy=multi-user.target

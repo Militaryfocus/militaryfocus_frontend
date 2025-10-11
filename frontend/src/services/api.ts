@@ -1,5 +1,25 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { Hero, BuildGuide, User, News, SearchResponse, AuthResponse, LoginRequest, RegisterRequest } from '../types';
+import { 
+  Hero, 
+  BuildGuide, 
+  User, 
+  News, 
+  SearchResponse, 
+  AuthResponse, 
+  LoginRequest, 
+  RegisterRequest,
+  HeroesStats,
+  UserStats,
+  GuideStats,
+  NewsStats,
+  SearchSuggestion,
+  SearchSuggestionsResponse,
+  HeroSearchResponse,
+  GuideSearchResponse,
+  UserSearchResponse,
+  HealthCheckResponse,
+  Comment
+} from '../types';
 
 class ApiService {
   private api: AxiosInstance;
@@ -74,8 +94,8 @@ class ApiService {
     return response.data.roles;
   }
 
-  async getHeroesStats(): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get('/heroes/stats/overview');
+  async getHeroesStats(): Promise<HeroesStats> {
+    const response: AxiosResponse<HeroesStats> = await this.api.get('/heroes/stats/overview');
     return response.data;
   }
 
@@ -123,8 +143,8 @@ class ApiService {
   async getGuideComments(id: number, params?: {
     skip?: number;
     limit?: number;
-  }): Promise<any[]> {
-    const response: AxiosResponse<any[]> = await this.api.get(`/guides/${id}/comments`, { params });
+  }): Promise<Comment[]> {
+    const response: AxiosResponse<Comment[]> = await this.api.get(`/guides/${id}/comments`, { params });
     return response.data;
   }
 
@@ -171,8 +191,8 @@ class ApiService {
     return response.data;
   }
 
-  async getUserStats(id: number): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get(`/users/${id}/stats`);
+  async getUserStats(id: number): Promise<UserStats> {
+    const response: AxiosResponse<UserStats> = await this.api.get(`/users/${id}/stats`);
     return response.data;
   }
 
@@ -255,8 +275,8 @@ class ApiService {
   async searchHeroes(query: string, params?: {
     role?: string;
     limit?: number;
-  }): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get('/search/heroes', {
+  }): Promise<HeroSearchResponse> {
+    const response: AxiosResponse<HeroSearchResponse> = await this.api.get('/search/heroes', {
       params: { q: query, ...params }
     });
     return response.data;
@@ -267,8 +287,8 @@ class ApiService {
     difficulty?: string;
     play_style?: string;
     limit?: number;
-  }): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get('/search/guides', {
+  }): Promise<GuideSearchResponse> {
+    const response: AxiosResponse<GuideSearchResponse> = await this.api.get('/search/guides', {
       params: { q: query, ...params }
     });
     return response.data;
@@ -277,23 +297,23 @@ class ApiService {
   async searchUsers(query: string, params?: {
     role?: string;
     limit?: number;
-  }): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get('/search/users', {
+  }): Promise<UserSearchResponse> {
+    const response: AxiosResponse<UserSearchResponse> = await this.api.get('/search/users', {
       params: { q: query, ...params }
     });
     return response.data;
   }
 
-  async getSearchSuggestions(query: string, limit?: number): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get('/search/suggestions', {
+  async getSearchSuggestions(query: string, limit?: number): Promise<SearchSuggestionsResponse> {
+    const response: AxiosResponse<SearchSuggestionsResponse> = await this.api.get('/search/suggestions', {
       params: { q: query, limit }
     });
     return response.data;
   }
 
   // Health check
-  async healthCheck(): Promise<any> {
-    const response: AxiosResponse<any> = await this.api.get('/api/health');
+  async healthCheck(): Promise<HealthCheckResponse> {
+    const response: AxiosResponse<HealthCheckResponse> = await this.api.get('/api/health');
     return response.data;
   }
 }

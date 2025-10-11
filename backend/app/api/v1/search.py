@@ -2,8 +2,13 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.core.database import get_db
+from app.core.validation import InputValidator
+from app.core.logging import get_logger
 from app.models import Hero, User, BuildGuide
 from app.crud import hero as hero_crud, user as user_crud, guide as guide_crud
+
+# Инициализация логгера
+logger = get_logger("search")
 
 router = APIRouter()
 
@@ -15,8 +20,19 @@ async def search(
     db: Session = Depends(get_db)
 ):
     """Универсальный поиск по платформе"""
+    # Валидация входных данных
+    try:
+        query = InputValidator.validate_search_query(q)
+        skip, limit = InputValidator.validate_pagination_params(0, limit)
+        logger.info(f"Search request: '{query}', type: {type}, limit: {limit}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Search validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail="Invalid search parameters")
+    
     results = {
-        "query": q,
+        "query": query,
         "total_results": 0,
         "heroes": [],
         "guides": [],

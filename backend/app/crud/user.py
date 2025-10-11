@@ -91,11 +91,14 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
 
 def get_user_stats(db: Session) -> dict:
     """Получить статистику пользователей"""
-    total_users = db.query(User).count()
-    active_users = db.query(User).filter(User.is_active == True).count()
-    content_creators = db.query(User).filter(User.role == "Content Creator").count()
-    moderators = db.query(User).filter(User.role == "Moderator").count()
-    admins = db.query(User).filter(User.role == "Admin").count()
+    # Оптимизированный запрос с группировкой
+    stats = db.query(
+        func.count(User.id).label('total_users'),
+        func.count(func.case([(User.is_active == True, User.id)])).label('active_users'),
+        func.count(func.case([(User.role == "Content Creator", User.id)])).label('content_creators'),
+        func.count(func.case([(User.role == "Moderator", User.id)])).label('moderators'),
+        func.count(func.case([(User.role == "Admin", User.id)])).label('admins')
+    ).first()
     
     # Новые пользователи за сегодня
     today = datetime.now().date()
@@ -110,11 +113,11 @@ def get_user_stats(db: Session) -> dict:
     ).count()
     
     return {
-        "total_users": total_users,
-        "active_users": active_users,
-        "content_creators": content_creators,
-        "moderators": moderators,
-        "admins": admins,
+        "total_users": stats.total_users,
+        "active_users": stats.active_users,
+        "content_creators": stats.content_creators,
+        "moderators": stats.moderators,
+        "admins": stats.admins,
         "new_users_today": new_users_today,
         "new_users_this_week": new_users_this_week
     }

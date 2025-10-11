@@ -57,8 +57,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(userData);
       
       toast.success('Успешный вход в систему!');
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Ошибка входа в систему';
+    } catch (error: unknown) {
+      const message = (error as any)?.response?.data?.detail || 'Ошибка входа в систему';
       toast.error(message);
       throw error;
     } finally {
@@ -78,8 +78,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       
       toast.success('Регистрация прошла успешно!');
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Ошибка регистрации';
+    } catch (error: unknown) {
+      const message = (error as any)?.response?.data?.detail || 'Ошибка регистрации';
       toast.error(message);
       throw error;
     } finally {
@@ -100,8 +100,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const updatedUser = await apiService.updateUser(user.id, userData);
       setUser(updatedUser);
       toast.success('Профиль обновлен!');
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Ошибка обновления профиля';
+    } catch (error: unknown) {
+      const message = (error as any)?.response?.data?.detail || 'Ошибка обновления профиля';
       toast.error(message);
       throw error;
     }
