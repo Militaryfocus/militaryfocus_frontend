@@ -1,8 +1,8 @@
-# Mobile Legends Community Platform v1.1.0
+# Mobile Legends Community Platform v1.1.1
 
 🚀 **Production-Ready** фан-сообщество Mobile Legends: Bang Bang с системой управления героями, гайдами, сборками и тактиками.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Militaryfocus/militaryfocus_frontend)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](https://github.com/Militaryfocus/militaryfocus_frontend)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED.svg)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/python-3.9+-3776AB.svg)](https://python.org/)
 [![React](https://img.shields.io/badge/react-18.2.0-61DAFB.svg)](https://reactjs.org/)
