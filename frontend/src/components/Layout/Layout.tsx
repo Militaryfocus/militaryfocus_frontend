@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, User, LogOut, Settings, BookOpen, Users, Newspaper } from 'lucide-react';
-import { useAuth } from '@/services/auth';
-import SearchModal from '@/components/Search/SearchModal';
+import { useAuth } from '../../services/auth';
+import SearchModal from '../Search/SearchModal';
 
 interface LayoutProps {
   children: React.ReactNode;
