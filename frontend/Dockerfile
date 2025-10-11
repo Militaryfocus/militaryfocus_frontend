@@ -18,6 +18,9 @@ RUN npm run build
 # Remove devDependencies to reduce image size
 RUN npm prune --production
 
+# Remove source code and node_modules to reduce image size
+RUN rm -rf src/ node_modules/ package*.json tsconfig.json
+
 # Install nginx
 RUN apk add --no-cache nginx
 

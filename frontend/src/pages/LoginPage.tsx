@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../services/auth';
-import { LoginRequest } from '@/types';
+import { LoginRequest } from '../types';
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
