@@ -106,12 +106,21 @@ document.addEventListener('DOMContentLoaded', function() {
         progressSection.style.display = 'block';
         updateProgress(0, 'Начинаем проверку...');
         
+        // Сначала загружаем системную информацию
+        axios.get('/api/system-info')
+            .then(response => {
+                displaySystemInfo(response.data);
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки системной информации:', error);
+            });
+        
+        // Затем проверяем требования
         axios.post('/api/check-requirements')
             .then(response => {
                 hideLoading(checkBtn, '<i class="fas fa-search mr-2"></i>Проверить');
                 requirements = response.data.requirements;
                 
-                displaySystemInfo(response.data.system_info);
                 displayRequirements(requirements);
                 
                 if (response.data.success) {
@@ -139,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="space-y-2">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Операционная система:</span>
-                    <span class="font-medium">${systemInfo.platform} ${systemInfo.platform_version}</span>
+                    <span class="font-medium">${systemInfo.os} ${systemInfo.os_version}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Архитектура:</span>
@@ -147,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Процессор:</span>
-                    <span class="font-medium">${systemInfo.processor}</span>
+                    <span class="font-medium">${systemInfo.cpu_count} ядер</span>
                 </div>
             </div>
             <div class="space-y-2">
@@ -157,11 +166,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Общая память:</span>
-                    <span class="font-medium">${systemInfo.total_memory}</span>
+                    <span class="font-medium">${(systemInfo.memory_total / 1024**3).toFixed(1)} GB</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Свободное место:</span>
-                    <span class="font-medium">${systemInfo.disk_usage}</span>
+                    <span class="font-medium">${(systemInfo.disk_free / 1024**3).toFixed(1)} GB</span>
                 </div>
             </div>
         `;
@@ -171,9 +180,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayRequirements(requirements) {
         requirementsList.innerHTML = '';
         
-        Object.entries(requirements).forEach(([name, info]) => {
+        const requirementNames = {
+            'python': 'Python',
+            'pip': 'Pip',
+            'node': 'Node.js',
+            'npm': 'NPM',
+            'postgresql': 'PostgreSQL',
+            'redis': 'Redis',
+            'disk_space': 'Свободное место',
+            'memory': 'Память',
+            'git': 'Git'
+        };
+        
+        Object.entries(requirements).forEach(([name, isInstalled]) => {
             const item = document.createElement('div');
-            const isInstalled = info.installed;
             const isCritical = ['python', 'pip', 'node', 'npm', 'disk_space', 'memory'].includes(name);
             
             item.className = `flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
@@ -191,8 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="flex items-center">
                     <i class="fas ${statusIcon} text-xl mr-3"></i>
                     <div>
-                        <div class="font-medium text-gray-900 capitalize">${name.replace('_', ' ')}</div>
-                        <div class="text-sm text-gray-600">${info.version} (требуется: ${info.required})</div>
+                        <div class="font-medium text-gray-900">${requirementNames[name] || name}</div>
+                        <div class="text-sm text-gray-600">${getRequirementDescription(name)}</div>
                     </div>
                 </div>
                 <div class="text-right">
@@ -200,12 +220,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                                       isCritical ? 'text-red-600' : 'text-yellow-600'}">
                         ${statusText}
                     </div>
-                    <div class="text-xs text-gray-500">${info.status}</div>
                 </div>
             `;
             
             requirementsList.appendChild(item);
         });
+    }
+    
+    function getRequirementDescription(name) {
+        const descriptions = {
+            'python': 'Версия 3.8 или выше',
+            'pip': 'Менеджер пакетов Python',
+            'node': 'Версия 16 или выше',
+            'npm': 'Менеджер пакетов Node.js',
+            'postgresql': 'База данных PostgreSQL',
+            'redis': 'Кэш-сервер Redis',
+            'disk_space': 'Минимум 1GB свободного места',
+            'memory': 'Минимум 1GB оперативной памяти',
+            'git': 'Система контроля версий'
+        };
+        return descriptions[name] || 'Системный компонент';
     }
     
     function getMissingDependencies(requirements) {
@@ -228,9 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
         logsSection.style.display = 'block';
         updateProgress(0, 'Начинаем установку недостающих компонентов...');
         
-        axios.post('/api/install-missing-dependencies', {
-            dependencies: missingDependencies
-        })
+        axios.post('/api/install-requirements')
         .then(response => {
             hideLoading(installBtn, '<i class="fas fa-download mr-2"></i>Установить недостающие');
             
