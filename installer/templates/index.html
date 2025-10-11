@@ -194,6 +194,17 @@
         </div>
     </div>
 
+    <!-- Quick Status Check -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="quick-status" style="display: none;">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Быстрая проверка системы</h2>
+        <div id="quick-status-content" class="text-center">
+            <div class="inline-flex items-center">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+                <span class="text-gray-600">Проверяем систему...</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Action Buttons -->
     <div class="text-center">
         {% if completed_steps|length == 0 %}
@@ -214,4 +225,56 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quickStatus = document.getElementById('quick-status');
+    const quickStatusContent = document.getElementById('quick-status-content');
+    
+    // Автоматически запускаем быструю проверку при загрузке
+    setTimeout(() => {
+        quickStatus.style.display = 'block';
+        checkQuickStatus();
+    }, 500);
+    
+    function checkQuickStatus() {
+        axios.post('/api/check-requirements')
+            .then(response => {
+                const requirements = response.data.requirements;
+                const criticalComponents = ['python', 'pip', 'node', 'npm', 'disk_space', 'memory'];
+                const criticalPassed = criticalComponents.every(comp => requirements[comp].installed);
+                
+                if (criticalPassed) {
+                    quickStatusContent.innerHTML = `
+                        <div class="text-green-600">
+                            <i class="fas fa-check-circle text-2xl mb-2"></i>
+                            <p class="text-lg font-semibold">Система готова к установке!</p>
+                            <p class="text-sm text-gray-600">Все критические требования выполнены</p>
+                        </div>
+                    `;
+                } else {
+                    const missing = criticalComponents.filter(comp => !requirements[comp].installed);
+                    quickStatusContent.innerHTML = `
+                        <div class="text-yellow-600">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p class="text-lg font-semibold">Требуется настройка</p>
+                            <p class="text-sm text-gray-600">Отсутствуют: ${missing.join(', ')}</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                quickStatusContent.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="fas fa-times-circle text-2xl mb-2"></i>
+                        <p class="text-lg font-semibold">Ошибка проверки</p>
+                        <p class="text-sm text-gray-600">Не удалось проверить систему</p>
+                    </div>
+                `;
+            });
+    }
+});
+</script>
 {% endblock %}

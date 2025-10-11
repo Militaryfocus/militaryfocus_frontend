@@ -51,6 +51,12 @@
             <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
         <div id="progress-text" class="text-sm text-gray-600">Готов к проверке...</div>
+        <div id="auto-redirect-section" class="mt-4 text-center" style="display: none;">
+            <button id="cancel-redirect-btn" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
+                <i class="fas fa-times mr-1"></i>
+                Отменить автоматический переход
+            </button>
+        </div>
     </div>
 
     <!-- Installation Logs -->
@@ -89,9 +95,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressText = document.getElementById('progress-text');
     const logsSection = document.getElementById('logs-section');
     const logsContainer = document.getElementById('logs-container');
+    const autoRedirectSection = document.getElementById('auto-redirect-section');
+    const cancelRedirectBtn = document.getElementById('cancel-redirect-btn');
     
     let requirements = {};
     let missingDependencies = [];
+    let countdownInterval = null;
     
     checkBtn.addEventListener('click', function() {
         checkRequirements();
@@ -99,6 +108,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     installBtn.addEventListener('click', function() {
         installMissingDependencies();
+    });
+    
+    cancelRedirectBtn.addEventListener('click', function() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        autoRedirectSection.style.display = 'none';
+        updateProgress(100, 'Проверка завершена успешно');
+        showAlert('Автоматический переход отменен', 'info');
     });
     
     function checkRequirements() {
@@ -124,9 +143,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayRequirements(requirements);
                 
                 if (response.data.success) {
-                    showAlert('Все критические требования выполнены!', 'success');
+                    showAlert('Все критические требования выполнены! Переходим к следующему шагу...', 'success');
                     nextBtn.disabled = false;
                     updateProgress(100, 'Проверка завершена успешно');
+                    
+                    // Показываем обратный отсчет
+                    autoRedirectSection.style.display = 'block';
+                    let countdown = 3;
+                    countdownInterval = setInterval(() => {
+                        updateProgress(100, `Переход к следующему шагу через ${countdown} сек...`);
+                        countdown--;
+                        if (countdown < 0) {
+                            clearInterval(countdownInterval);
+                            countdownInterval = null;
+                            window.location.href = '/step/2';
+                        }
+                    }, 1000);
                 } else {
                     showAlert('Некоторые критические требования не выполнены.', 'warning');
                     missingDependencies = getMissingDependencies(requirements);
@@ -305,6 +337,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Загружаем логи каждые 2 секунды
     setInterval(loadLogs, 2000);
+    
+    // Автоматически запускаем проверку при загрузке страницы
+    setTimeout(() => {
+        checkRequirements();
+    }, 1000);
     
     nextBtn.addEventListener('click', function() {
         window.location.href = '/step/2';
