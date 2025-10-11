@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useAuth } from '@/services/auth';
+import { useAuth } from '../services/auth';
 import { LoginRequest } from '@/types';
 
 const LoginPage: React.FC = () => {

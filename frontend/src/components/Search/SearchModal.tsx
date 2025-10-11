@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import { useQuery } from 'react-query';
 import apiService from '../../services/api';
-import { Hero, BuildGuide, User } from '@/types';
+import { Hero, BuildGuide, User } from '../../types';
 
 interface SearchModalProps {
   isOpen: boolean;
