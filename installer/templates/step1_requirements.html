@@ -3,42 +3,73 @@
 {% block title %}Шаг 1: Системные требования - Установщик ML Community{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-6xl mx-auto">
     <div class="text-center mb-8">
         <div class="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-cogs text-2xl text-blue-600"></i>
         </div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Шаг 1: Проверка системных требований</h1>
-        <p class="text-gray-600">Проверим наличие всех необходимых компонентов для работы платформы</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Проверка системных требований</h1>
+        <p class="text-lg text-gray-600">Проверим наличие всех необходимых компонентов для установки</p>
     </div>
 
+    <!-- System Info -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="system-info" style="display: none;">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Информация о системе</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="system-details">
+            <!-- Системная информация будет загружена через JavaScript -->
+        </div>
+    </div>
+
+    <!-- Requirements Check -->
     <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-6">Проверка компонентов</h2>
-        
-        <div id="requirements-list" class="space-y-4">
-            <!-- Требования будут загружены через JavaScript -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">Системные компоненты</h2>
+            <div class="flex space-x-2">
+                <button id="check-requirements-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200">
+                    <i class="fas fa-search mr-2"></i>
+                    Проверить
+                </button>
+                <button id="install-missing-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200" style="display: none;">
+                    <i class="fas fa-download mr-2"></i>
+                    Установить недостающие
+                </button>
+            </div>
         </div>
         
-        <div class="mt-8 text-center">
-            <button id="check-requirements-btn" 
-                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
-                <i class="fas fa-search mr-2"></i>
-                Проверить требования
-            </button>
+        <div class="space-y-3" id="requirements-list">
+            <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-info-circle text-2xl mb-2"></i>
+                <p>Нажмите "Проверить" для анализа системы</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="progress-section" style="display: none;">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Прогресс проверки</h3>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <div id="progress-text" class="text-sm text-gray-600">Готов к проверке...</div>
+    </div>
+
+    <!-- Installation Logs -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8" id="logs-section" style="display: none;">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Логи установки</h3>
+        <div id="logs-container" class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm max-h-64 overflow-y-auto">
+            <!-- Логи будут загружены здесь -->
         </div>
     </div>
 
     <div class="flex justify-between">
-        <a href="/" class="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+        <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors duration-200">
             <i class="fas fa-arrow-left mr-2"></i>
             Назад
         </a>
         
-        <button id="next-btn" 
-                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled>
-            <i class="fas fa-arrow-right mr-2"></i>
+        <button id="next-btn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
             Далее
+            <i class="fas fa-arrow-right ml-2"></i>
         </button>
     </div>
 </div>

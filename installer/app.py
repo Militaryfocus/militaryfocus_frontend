@@ -9,8 +9,11 @@ import sqlite3
 import subprocess
 import threading
 import time
+import shutil
+import platform
+import psutil
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 import psycopg2
 from psycopg2 import sql
 import redis
@@ -146,17 +149,35 @@ def check_requirements():
         "postgresql": check_postgresql(),
         "redis": check_redis(),
         "disk_space": check_disk_space(),
-        "memory": check_memory()
+        "memory": check_memory(),
+        "git": check_git(),
+        "curl": check_curl()
     }
     
-    all_passed = all(requirements.values())
+    # Проверяем только критически важные компоненты
+    critical_components = ["python", "pip", "node", "npm", "disk_space", "memory"]
+    critical_passed = all(requirements[comp]["installed"] for comp in critical_components)
     
-    if all_passed:
+    # Проверяем все компоненты
+    all_passed = all(req["installed"] for req in requirements.values())
+    
+    if critical_passed:
         config.update_step("system", requirements)
     
     return jsonify({
-        "success": all_passed,
-        "requirements": requirements
+        "success": critical_passed,
+        "all_passed": all_passed,
+        "requirements": requirements,
+        "critical_components": critical_components,
+        "system_info": {
+            "platform": platform.system(),
+            "platform_version": platform.version(),
+            "architecture": platform.machine(),
+            "processor": platform.processor(),
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "total_memory": f"{psutil.virtual_memory().total / (1024**3):.1f} GB",
+            "disk_usage": f"{shutil.disk_usage('/').free / (1024**3):.1f} GB свободно"
+        }
     })
 
 @app.route('/api/test-database', methods=['POST'])
@@ -341,6 +362,136 @@ def restart_services():
     except Exception as e:
         return jsonify({"success": False, "message": f"Ошибка перезапуска сервисов: {str(e)}"})
 
+@app.route('/api/install-missing-dependencies', methods=['POST'])
+def install_missing_dependencies():
+    """Установка недостающих зависимостей"""
+    try:
+        data = request.json
+        dependencies = data.get('dependencies', [])
+        
+        results = {}
+        
+        for dep in dependencies:
+            if dep == 'node':
+                # Установка Node.js через NodeSource
+                subprocess.run([
+                    'curl', '-fsSL', 'https://deb.nodesource.com/setup_18.x', '|', 'sudo', '-E', 'bash', '-'
+                ], shell=True, check=True)
+                subprocess.run(['apt', 'install', '-y', 'nodejs'], check=True)
+                results[dep] = True
+                
+            elif dep == 'postgresql':
+                subprocess.run(['apt', 'update'], check=True)
+                subprocess.run(['apt', 'install', '-y', 'postgresql', 'postgresql-contrib'], check=True)
+                subprocess.run(['systemctl', 'start', 'postgresql'], check=True)
+                subprocess.run(['systemctl', 'enable', 'postgresql'], check=True)
+                results[dep] = True
+                
+            elif dep == 'redis':
+                subprocess.run(['apt', 'install', '-y', 'redis-server'], check=True)
+                subprocess.run(['systemctl', 'start', 'redis-server'], check=True)
+                subprocess.run(['systemctl', 'enable', 'redis-server'], check=True)
+                results[dep] = True
+                
+            elif dep == 'git':
+                subprocess.run(['apt', 'install', '-y', 'git'], check=True)
+                results[dep] = True
+                
+            elif dep == 'curl':
+                subprocess.run(['apt', 'install', '-y', 'curl'], check=True)
+                results[dep] = True
+        
+        return jsonify({
+            "success": True,
+            "message": "Зависимости установлены",
+            "results": results
+        })
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Ошибка установки зависимостей: {str(e)}"})
+
+@app.route('/api/validate-config', methods=['POST'])
+def validate_config():
+    """Валидация конфигурации"""
+    try:
+        data = request.json
+        step = data.get('step')
+        
+        if step == 'database':
+            # Валидация конфигурации базы данных
+            host = data.get('host', 'localhost')
+            port = data.get('port', 5432)
+            database = data.get('database', 'ml_community')
+            username = data.get('username', 'ml_user')
+            password = data.get('password', '')
+            
+            if not all([host, database, username]):
+                return jsonify({"success": False, "message": "Все поля обязательны"})
+            
+            if not (1 <= port <= 65535):
+                return jsonify({"success": False, "message": "Порт должен быть от 1 до 65535"})
+            
+            if len(password) < 6:
+                return jsonify({"success": False, "message": "Пароль должен содержать минимум 6 символов"})
+            
+            return jsonify({"success": True, "message": "Конфигурация валидна"})
+            
+        elif step == 'admin':
+            # Валидация данных администратора
+            username = data.get('username', '')
+            email = data.get('email', '')
+            password = data.get('password', '')
+            
+            if not username or len(username) < 3:
+                return jsonify({"success": False, "message": "Имя пользователя должно содержать минимум 3 символа"})
+            
+            if not email or '@' not in email:
+                return jsonify({"success": False, "message": "Введите корректный email"})
+            
+            if not password or len(password) < 6:
+                return jsonify({"success": False, "message": "Пароль должен содержать минимум 6 символов"})
+            
+            return jsonify({"success": True, "message": "Данные администратора валидны"})
+        
+        return jsonify({"success": True, "message": "Конфигурация валидна"})
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Ошибка валидации: {str(e)}"})
+
+@app.route('/api/get-installation-logs')
+def get_installation_logs():
+    """Получение логов установки"""
+    return jsonify({
+        "logs": installation_status.get("logs", []),
+        "running": installation_status.get("running", False),
+        "completed": installation_status.get("completed", False),
+        "error": installation_status.get("error", None)
+    })
+
+@app.route('/api/check-port', methods=['POST'])
+def check_port():
+    """Проверка доступности порта"""
+    try:
+        data = request.json
+        port = data.get('port', 8001)
+        
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('localhost', port))
+        sock.close()
+        
+        is_available = result != 0
+        
+        return jsonify({
+            "success": True,
+            "available": is_available,
+            "port": port,
+            "message": "Порт свободен" if is_available else "Порт занят"
+        })
+    
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Ошибка проверки порта: {str(e)}"})
+
 def check_service_status(service_name):
     """Проверка статуса сервиса"""
     try:
@@ -356,75 +507,240 @@ def check_service_status(service_name):
 
 def check_python_version():
     """Проверка версии Python"""
-    return sys.version_info >= (3, 8)
+    version = sys.version_info
+    return {
+        "installed": version >= (3, 8),
+        "version": f"{version.major}.{version.minor}.{version.micro}",
+        "required": "3.8+",
+        "status": "✅" if version >= (3, 8) else "❌"
+    }
 
 def check_pip():
     """Проверка наличия pip"""
     try:
         import pip
-        return True
+        version = pip.__version__
+        return {
+            "installed": True,
+            "version": version,
+            "required": "любая",
+            "status": "✅"
+        }
     except ImportError:
-        return False
+        return {
+            "installed": False,
+            "version": "не установлен",
+            "required": "любая",
+            "status": "❌"
+        }
 
 def check_node():
     """Проверка наличия Node.js"""
     try:
-        import subprocess
-        result = subprocess.run(['node', '--version'], capture_output=True, text=True)
-        return result.returncode == 0
-    except:
-        return False
+        result = subprocess.run(['node', '--version'], capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            version = result.stdout.strip().replace('v', '')
+            major_version = int(version.split('.')[0])
+            return {
+                "installed": True,
+                "version": version,
+                "required": "16+",
+                "status": "✅" if major_version >= 16 else "⚠️"
+            }
+        else:
+            return {
+                "installed": False,
+                "version": "не установлен",
+                "required": "16+",
+                "status": "❌"
+            }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "16+",
+            "status": "❌"
+        }
 
 def check_npm():
     """Проверка наличия npm"""
     try:
-        import subprocess
-        result = subprocess.run(['npm', '--version'], capture_output=True, text=True)
-        return result.returncode == 0
-    except:
-        return False
+        result = subprocess.run(['npm', '--version'], capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            major_version = int(version.split('.')[0])
+            return {
+                "installed": True,
+                "version": version,
+                "required": "8+",
+                "status": "✅" if major_version >= 8 else "⚠️"
+            }
+        else:
+            return {
+                "installed": False,
+                "version": "не установлен",
+                "required": "8+",
+                "status": "❌"
+            }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "8+",
+            "status": "❌"
+        }
 
 def check_postgresql():
     """Проверка доступности PostgreSQL"""
     try:
-        conn = psycopg2.connect(
-            host='localhost',
-            port=5432,
-            database='postgres',
-            user='postgres',
-            password='postgres'
-        )
-        conn.close()
-        return True
-    except:
-        return False
+        # Пробуем разные варианты подключения
+        test_configs = [
+            {'host': 'localhost', 'port': 5432, 'database': 'postgres', 'user': 'postgres', 'password': 'postgres'},
+            {'host': 'localhost', 'port': 5432, 'database': 'postgres', 'user': 'postgres', 'password': ''},
+            {'host': 'localhost', 'port': 5432, 'database': 'postgres', 'user': 'postgres', 'password': 'admin'},
+        ]
+        
+        for config in test_configs:
+            try:
+                conn = psycopg2.connect(**config)
+                conn.close()
+                return {
+                    "installed": True,
+                    "version": "доступен",
+                    "required": "12+",
+                    "status": "✅"
+                }
+            except:
+                continue
+        
+        return {
+            "installed": False,
+            "version": "недоступен",
+            "required": "12+",
+            "status": "❌"
+        }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "12+",
+            "status": "❌"
+        }
 
 def check_redis():
     """Проверка доступности Redis"""
     try:
-        r = redis.Redis(host='localhost', port=6379)
+        r = redis.Redis(host='localhost', port=6379, socket_timeout=5)
         r.ping()
-        return True
-    except:
-        return False
+        return {
+            "installed": True,
+            "version": "доступен",
+            "required": "6+",
+            "status": "✅"
+        }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"недоступен: {str(e)}",
+            "required": "6+",
+            "status": "❌"
+        }
 
 def check_disk_space():
     """Проверка свободного места на диске"""
     try:
-        import shutil
         free_space = shutil.disk_usage('/').free
-        return free_space > 1024 * 1024 * 1024  # 1GB
-    except:
-        return False
+        free_gb = free_space / (1024**3)
+        required_gb = 1
+        
+        return {
+            "installed": free_gb >= required_gb,
+            "version": f"{free_gb:.1f} GB свободно",
+            "required": f"{required_gb} GB",
+            "status": "✅" if free_gb >= required_gb else "❌"
+        }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "1 GB",
+            "status": "❌"
+        }
 
 def check_memory():
     """Проверка доступной памяти"""
     try:
-        import psutil
         memory = psutil.virtual_memory()
-        return memory.available > 1024 * 1024 * 1024  # 1GB
-    except:
-        return False
+        available_gb = memory.available / (1024**3)
+        required_gb = 1
+        
+        return {
+            "installed": available_gb >= required_gb,
+            "version": f"{available_gb:.1f} GB доступно",
+            "required": f"{required_gb} GB",
+            "status": "✅" if available_gb >= required_gb else "❌"
+        }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "1 GB",
+            "status": "❌"
+        }
+
+def check_git():
+    """Проверка наличия Git"""
+    try:
+        result = subprocess.run(['git', '--version'], capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            return {
+                "installed": True,
+                "version": version,
+                "required": "любая",
+                "status": "✅"
+            }
+        else:
+            return {
+                "installed": False,
+                "version": "не установлен",
+                "required": "любая",
+                "status": "❌"
+            }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "любая",
+            "status": "❌"
+        }
+
+def check_curl():
+    """Проверка наличия curl"""
+    try:
+        result = subprocess.run(['curl', '--version'], capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            version = result.stdout.split('\n')[0]
+            return {
+                "installed": True,
+                "version": version,
+                "required": "любая",
+                "status": "✅"
+            }
+        else:
+            return {
+                "installed": False,
+                "version": "не установлен",
+                "required": "любая",
+                "status": "❌"
+            }
+    except Exception as e:
+        return {
+            "installed": False,
+            "version": f"ошибка: {str(e)}",
+            "required": "любая",
+            "status": "❌"
+        }
 
 def generate_backend_env():
     """Генерация .env файла для backend"""
