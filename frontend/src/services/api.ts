@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { Hero, BuildGuide, User, News, SearchResponse, AuthResponse, LoginRequest, RegisterRequest } from '@/types';
+import { Hero, BuildGuide, User, News, SearchResponse, AuthResponse, LoginRequest, RegisterRequest } from '../types';
 
 class ApiService {
   private api: AxiosInstance;

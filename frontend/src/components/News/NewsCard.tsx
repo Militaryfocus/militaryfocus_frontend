@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Calendar, User, Tag } from 'lucide-react';
-import { News } from '@/types';
+import { News } from '../../types';
 
 interface NewsCardProps {
   news: News;

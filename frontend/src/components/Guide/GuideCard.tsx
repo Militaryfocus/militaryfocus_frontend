@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Eye, Heart, User, Calendar } from 'lucide-react';
-import { BuildGuide } from '@/types';
+import { BuildGuide } from '../../types';
 
 interface GuideCardProps {
   guide: BuildGuide;

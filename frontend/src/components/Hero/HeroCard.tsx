@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Eye, Heart } from 'lucide-react';
-import { Hero } from '@/types';
+import { Hero } from '../../types';
 
 interface HeroCardProps {
   hero: Hero;
