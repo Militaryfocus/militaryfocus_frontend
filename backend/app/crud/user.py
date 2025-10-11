@@ -4,7 +4,18 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 from app.models import User
 from app.schemas.user import UserCreate, UserUpdate
-from app.core.security import get_password_hash, verify_password
+from passlib.context import CryptContext
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    """Получить хеш пароля"""
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Проверить пароль"""
+    return pwd_context.verify(plain_password, hashed_password)
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
     """Получить пользователя по ID"""

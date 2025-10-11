@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.models import User
 from app.schemas.user import UserCreate, UserResponse, Token
 from app.crud import user as user_crud
-from app.core.security import verify_password, create_access_token, get_password_hash, oauth2_scheme, get_current_user
+from app.core.security import create_access_token, oauth2_scheme, get_current_user
 
 router = APIRouter()
 

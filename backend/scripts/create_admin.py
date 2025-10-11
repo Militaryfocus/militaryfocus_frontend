@@ -8,7 +8,14 @@ import sys
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.models import User
-from app.core.security import get_password_hash
+from passlib.context import CryptContext
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def get_password_hash(password: str) -> str:
+    """Получить хеш пароля"""
+    return pwd_context.hash(password)
 
 def create_admin():
     """Создать администратора"""
