@@ -37,7 +37,7 @@ async def health_check():
     return {
         "status": "healthy", 
         "service": "ml-community-api",
-        "version": "1.1.2",
+        "version": "1.1.3",
         "message": "Mobile Legends Community Platform is running"
     }
 
