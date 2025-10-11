@@ -7,7 +7,7 @@ from app.api.v1 import heroes, guides, users, auth, search, news
 app = FastAPI(
     title="Mobile Legends Community API",
     description="Фан-сообщество Mobile Legends: Bang Bang - API для управления героями, гайдами и тактиками",
-    version="1.1.4",
+    version="1.1.5",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -37,7 +37,7 @@ async def health_check():
     return {
         "status": "healthy", 
         "service": "ml-community-api",
-        "version": "1.1.4",
+        "version": "1.1.5",
         "message": "Mobile Legends Community Platform is running"
     }
 

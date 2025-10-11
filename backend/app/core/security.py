@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.models import User
-from app.crud import user as user_crud
+# from app.crud import user as user_crud  # Removed to fix circular import
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -51,6 +51,8 @@ def get_current_user(
     db: Session = Depends(get_db)
 ) -> User:
     """Получить текущего пользователя по токену"""
+    from app.crud import user as user_crud  # Import here to avoid circular import
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
