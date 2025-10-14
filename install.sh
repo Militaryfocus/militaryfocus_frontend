@@ -33,19 +33,22 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if running as root
+# Check if running as root - ALLOWED for server installation
 if [[ $EUID -eq 0 ]]; then
-   print_error "This script should not be run as root for security reasons"
-   exit 1
+   print_warning "Running as root - this is allowed for server installation"
+   print_status "Continuing with root privileges..."
+   ROOT_USER=true
+else
+   ROOT_USER=false
 fi
 
 # Update system packages
 print_status "Updating system packages..."
-sudo apt update -y
+apt update -y
 
 # Install system dependencies
 print_status "Installing system dependencies..."
-sudo apt install -y \
+apt install -y \
     python3 \
     python3-pip \
     python3-venv \
@@ -70,8 +73,8 @@ sudo apt install -y \
 print_status "Installing Docker and Docker Compose..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
-    sudo usermod -aG docker $USER
+    sh get-docker.sh
+    usermod -aG docker $USER
     rm get-docker.sh
     print_success "Docker installed successfully"
 else
@@ -79,8 +82,8 @@ else
 fi
 
 if ! command -v docker-compose &> /dev/null; then
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
+    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
     print_success "Docker Compose installed successfully"
 else
     print_warning "Docker Compose already installed"
@@ -88,19 +91,29 @@ fi
 
 # Start and enable services
 print_status "Starting and enabling services..."
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-sudo systemctl start redis-server
-sudo systemctl enable redis-server
+systemctl start postgresql
+systemctl enable postgresql
+systemctl start redis-server
+systemctl enable redis-server
 
 # Configure PostgreSQL
 print_status "Configuring PostgreSQL..."
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';" || true
-sudo -u postgres psql -c "CREATE USER ml_user WITH PASSWORD 'ml_password' CREATEDB SUPERUSER;" || true
-sudo -u postgres createdb ml_community || true
+if [[ "$ROOT_USER" == "true" ]]; then
+    sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';" || true
+    sudo -u postgres psql -c "CREATE USER ml_user WITH PASSWORD 'ml_password' CREATEDB SUPERUSER;" || true
+    sudo -u postgres createdb ml_community || true
+else
+    postgres psql -c "ALTER USER postgres PASSWORD 'postgres';" || true
+    postgres psql -c "CREATE USER ml_user WITH PASSWORD 'ml_password' CREATEDB SUPERUSER;" || true
+    postgres createdb ml_community || true
+fi
 
 # Grant privileges
-sudo -u postgres psql -d ml_community -c "GRANT ALL PRIVILEGES ON DATABASE ml_community TO ml_user;" || true
+if [[ "$ROOT_USER" == "true" ]]; then
+    sudo -u postgres psql -d ml_community -c "GRANT ALL PRIVILEGES ON DATABASE ml_community TO ml_user;" || true
+else
+    postgres psql -d ml_community -c "GRANT ALL PRIVILEGES ON DATABASE ml_community TO ml_user;" || true
+fi
 
 # Setup backend
 print_status "Setting up backend..."
@@ -120,8 +133,13 @@ sed -i 's/redis:6379/localhost:6379/g' app/core/config.py || true
 
 # Initialize database
 print_status "Initializing database..."
-PGPASSWORD=ml_password psql -h localhost -U ml_user -d ml_community -f ../init_database.sql || true
-python3 simple_db_init.py || true
+if [[ "$ROOT_USER" == "true" ]]; then
+    PGPASSWORD=ml_password sudo -u postgres psql -h localhost -U ml_user -d ml_community -f ../init_database.sql || true
+    python3 simple_db_init.py || true
+else
+    PGPASSWORD=ml_password psql -h localhost -U ml_user -d ml_community -f ../init_database.sql || true
+    python3 simple_db_init.py || true
+fi
 
 # Start backend in background
 print_status "Starting backend server..."
@@ -167,10 +185,18 @@ else
 fi
 
 # Test database
-if PGPASSWORD=ml_password psql -h localhost -U ml_user -d ml_community -c "SELECT 1;" > /dev/null 2>&1; then
-    print_success "Database connection successful"
+if [[ "$ROOT_USER" == "true" ]]; then
+    if PGPASSWORD=ml_password sudo -u postgres psql -h localhost -U ml_user -d ml_community -c "SELECT 1;" > /dev/null 2>&1; then
+        print_success "Database connection successful"
+    else
+        print_warning "Database connection may have issues"
+    fi
 else
-    print_warning "Database connection may have issues"
+    if PGPASSWORD=ml_password psql -h localhost -U ml_user -d ml_community -c "SELECT 1;" > /dev/null 2>&1; then
+        print_success "Database connection successful"
+    else
+        print_warning "Database connection may have issues"
+    fi
 fi
 
 # Test Redis
