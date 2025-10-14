@@ -5,7 +5,7 @@ import os
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://ml_user:ml_password@db:5432/ml_community"
+    DATABASE_URL: str = "postgresql://ml_user:ml_password@localhost:5432/ml_community"
     
     # Redis
     REDIS_URL: str = "redis://redis:6379"
