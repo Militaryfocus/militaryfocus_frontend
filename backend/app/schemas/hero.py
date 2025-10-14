@@ -6,7 +6,7 @@ class HeroBase(BaseModel):
     name: str
     role: str
     specialty: str
-    lane: List[str]
+    lane: Optional[List[str]] = None
     durability: Optional[int] = None
     offense: Optional[int] = None
     control: Optional[int] = None
@@ -54,6 +54,9 @@ class HeroResponse(HeroBase):
 
     class Config:
         from_attributes = True
+        json_encoders = {
+            # Добавляем обработку для JSON полей
+        }
 
 class HeroDetail(HeroResponse):
     """Детальная информация о герое с дополнительными данными"""

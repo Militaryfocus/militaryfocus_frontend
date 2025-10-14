@@ -17,14 +17,17 @@ async def get_heroes(
     db: Session = Depends(get_db)
 ):
     """Получить список всех героев с фильтрацией"""
-    heroes = hero_crud.get_heroes(
-        db=db, 
-        skip=skip, 
-        limit=limit, 
-        role=role, 
-        search=search
-    )
-    return heroes
+    try:
+        heroes = hero_crud.get_heroes(
+            db=db, 
+            skip=skip, 
+            limit=limit, 
+            role=role, 
+            search=search
+        )
+        return heroes
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/{hero_id}", response_model=HeroDetail)
 async def get_hero(hero_id: int, db: Session = Depends(get_db)):

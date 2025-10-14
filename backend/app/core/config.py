@@ -5,10 +5,13 @@ import os
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://ml_user:ml_password@db:5432/ml_community"
+    DATABASE_URL: str = "postgresql://ml_user:ml_password@localhost:5432/ml_community"
+    POSTGRES_DB: str = "ml_community"
+    POSTGRES_USER: str = "ml_user"
+    POSTGRES_PASSWORD: str = "ml_password"
     
     # Redis
-    REDIS_URL: str = "redis://redis:6379"
+    REDIS_URL: str = "redis://localhost:6379"
     
     # Security
     SECRET_KEY: str = Field(default="your-secret-key-change-in-production", min_length=32)
