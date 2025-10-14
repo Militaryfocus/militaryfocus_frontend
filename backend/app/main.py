@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
-from app.api.v1 import heroes, guides, users, auth, search, news
+from app.api.v1 import heroes, guides, users, auth, search, news, health
 
 app = FastAPI(
     title="Mobile Legends Community API",
@@ -31,6 +31,7 @@ app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
 app.include_router(news.router, prefix="/api/v1/news", tags=["news"])
+app.include_router(health.router, prefix="/api/v1/health", tags=["health"])
 
 @app.get("/api/health")
 async def health_check():
