@@ -1,49 +1,87 @@
-# docker-compose.prod.yml - Production конфигурация
-
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./data/uploads:/var/www/uploads
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
   backend:
-    image: militaryfocus/ml-community-backend:latest
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://ml_user:${POSTGRES_PASSWORD}@db:5432/ml_community
+      - DATABASE_URL=postgresql://ml_user:ml_password@db:5432/ml_community
       - REDIS_URL=redis://redis:6379
-      - SECRET_KEY=${SECRET_KEY}
-      - ENVIRONMENT=production
-      - DEBUG=false
+      - SECRET_KEY=your-secret-key-change-in-production-make-it-long-and-random
+      - BACKEND_CORS_ORIGINS=["http://localhost", "http://localhost:3000", "http://localhost:80"]
     depends_on:
       - db
       - redis
+    volumes:
+      - ./data/uploads:/app/static/uploads
+      - ./data/hero_images:/app/static/heroes
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
     restart: unless-stopped
 
   frontend:
-    image: militaryfocus/ml-community-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost/api/v1
     depends_on:
       - backend
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000/api/v1
     restart: unless-stopped
 
   db:
-    image: postgres:13
+    image: postgres:15-alpine
     environment:
       - POSTGRES_DB=ml_community
       - POSTGRES_USER=ml_user
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=ml_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init_database.sql:/docker-entrypoint-initdb.d/init_database.sql
+    ports:
+      - "5432:5432"
     restart: unless-stopped
 
   redis:
-    image: redis:6-alpine
+    image: redis:7-alpine
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Elasticsearch for search functionality
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
     restart: unless-stopped
 
 volumes:
   postgres_data:
   redis_data:
+  elasticsearch_data:
