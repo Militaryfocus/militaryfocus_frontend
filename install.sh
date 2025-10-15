@@ -44,37 +44,69 @@ fi
 
 # Update system packages
 print_status "Updating system packages..."
-apt update -y
+if [[ "$ROOT_USER" == "true" ]]; then
+    apt update -y
+else
+    sudo apt update -y
+fi
 
 # Install system dependencies
 print_status "Installing system dependencies..."
-apt install -y \
-    python3 \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    postgresql \
-    postgresql-contrib \
-    postgresql-server-dev-all \
-    libpq-dev \
-    redis-server \
-    nodejs \
-    npm \
-    git \
-    curl \
-    wget \
-    build-essential \
-    libssl-dev \
-    libffi-dev \
-    libjpeg-dev \
-    zlib1g-dev
+if [[ "$ROOT_USER" == "true" ]]; then
+    apt install -y \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-dev \
+        postgresql \
+        postgresql-contrib \
+        postgresql-server-dev-all \
+        libpq-dev \
+        redis-server \
+        nodejs \
+        npm \
+        git \
+        curl \
+        wget \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        libjpeg-dev \
+        zlib1g-dev
+else
+    sudo apt install -y \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-dev \
+        postgresql \
+        postgresql-contrib \
+        postgresql-server-dev-all \
+        libpq-dev \
+        redis-server \
+        nodejs \
+        npm \
+        git \
+        curl \
+        wget \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        libjpeg-dev \
+        zlib1g-dev
+fi
 
 # Install Docker and Docker Compose
 print_status "Installing Docker and Docker Compose..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
-    usermod -aG docker $USER
+    if [[ "$ROOT_USER" == "true" ]]; then
+        sh get-docker.sh
+        usermod -aG docker $USER
+    else
+        sudo sh get-docker.sh
+        sudo usermod -aG docker $USER
+    fi
     rm get-docker.sh
     print_success "Docker installed successfully"
 else
@@ -83,7 +115,11 @@ fi
 
 if ! command -v docker-compose &> /dev/null; then
     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+    if [[ "$ROOT_USER" == "true" ]]; then
+        chmod +x /usr/local/bin/docker-compose
+    else
+        sudo chmod +x /usr/local/bin/docker-compose
+    fi
     print_success "Docker Compose installed successfully"
 else
     print_warning "Docker Compose already installed"
@@ -91,10 +127,17 @@ fi
 
 # Start and enable services
 print_status "Starting and enabling services..."
-systemctl start postgresql
-systemctl enable postgresql
-systemctl start redis-server
-systemctl enable redis-server
+if [[ "$ROOT_USER" == "true" ]]; then
+    systemctl start postgresql
+    systemctl enable postgresql
+    systemctl start redis-server
+    systemctl enable redis-server
+else
+    sudo systemctl start postgresql
+    sudo systemctl enable postgresql
+    sudo systemctl start redis-server
+    sudo systemctl enable redis-server
+fi
 
 # Configure PostgreSQL
 print_status "Configuring PostgreSQL..."
@@ -291,7 +334,11 @@ fi
 EOF
 
 # Make scripts executable
-chmod +x ../start.sh ../stop.sh ../status.sh
+if [[ "$ROOT_USER" == "true" ]]; then
+    chmod +x ../start.sh ../stop.sh ../status.sh
+else
+    chmod +x ../start.sh ../stop.sh ../status.sh
+fi
 
 # Final status
 print_success "🎉 Installation completed successfully!"
