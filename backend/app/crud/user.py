@@ -4,7 +4,7 @@ from typing import Optional, List
 from datetime import datetime, timedelta
 from app.models import User
 from app.schemas.user import UserCreate, UserUpdate
-from app.core.security import get_password_hash, verify_password
+from app.core.hashing import get_password_hash, verify_password
 
 def get_user(db: Session, user_id: int) -> Optional[User]:
     """Получить пользователя по ID"""
