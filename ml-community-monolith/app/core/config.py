@@ -5,14 +5,12 @@ import os
 
 class Settings(BaseSettings):
     # Database
-    # Database: ml_community
-    # User: ml_admin
-    # Password: ML_Community_2024!
-    # Host: localhost (development) / db (docker)
     DATABASE_URL: str = "postgresql://ml_admin:ML_Community_2024!@localhost:5432/ml_community"
+    POSTGRES_DB: str = "ml_community"
+    POSTGRES_USER: str = "ml_admin"
+    POSTGRES_PASSWORD: str = "ML_Community_2024!"
     
     # Redis
-    # Host: localhost (development) / redis (docker)
     REDIS_URL: str = "redis://localhost:6379"
     
     # Security
@@ -26,6 +24,7 @@ class Settings(BaseSettings):
     # File Upload
     MAX_FILE_SIZE: int = 5 * 1024 * 1024  # 5MB
     UPLOAD_DIR: str = "static/uploads"
+    UPLOAD_DIRECTORY: str = "/app/app/static/uploads"
     ALLOWED_EXTENSIONS: set = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
     
     # Pagination
@@ -35,6 +34,10 @@ class Settings(BaseSettings):
     # ML Official API
     ML_OFFICIAL_API_URL: str = "https://api.mobilelegends.com"
     ML_OFFICIAL_API_KEY: str = ""
+    
+    # API Configuration
+    API_V1_STR: str = "/api/v1"
+    PROJECT_NAME: str = "ML Community Platform"
     
     # Database Connection Pool Settings
     DB_POOL_SIZE: int = 10
@@ -49,6 +52,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # Игнорировать дополнительные поля из .env
 
 # Global settings instance
 settings = Settings()
