@@ -39,8 +39,12 @@ chmod +x scripts/install.sh
    docker-compose up -d
    ```
 
-4. **Примените миграции:**
+4. **Инициализируйте базу данных:**
    ```bash
+   # Автоматическая инициализация
+   docker-compose exec backend ./scripts/docker_init_db.sh
+   
+   # Или вручную
    docker-compose exec backend alembic upgrade head
    ```
 
@@ -49,6 +53,29 @@ chmod +x scripts/install.sh
    docker-compose exec backend python scripts/import_heroes.py
    docker-compose exec backend python scripts/create_admin.py
    ```
+
+## 📊 Настройка базы данных
+
+### Параметры подключения
+
+- **Имя базы данных:** `ml_community`
+- **Пользователь:** `ml_admin`
+- **Пароль:** `ML_Community_2024!`
+- **Хост:** `localhost` (разработка) / `db` (Docker)
+- **Порт:** `5432`
+
+### Быстрая настройка
+
+```bash
+# Локальная разработка
+cd backend
+./scripts/init_database.sh
+
+# Docker
+docker-compose exec backend ./scripts/docker_init_db.sh
+```
+
+Подробная инструкция по настройке базы данных: [DATABASE_SETUP.md](DATABASE_SETUP.md)
 
 ## 📋 Системные требования
 
@@ -87,10 +114,10 @@ chmod +x scripts/install.sh
 
 ```bash
 # База данных
-DATABASE_URL=postgresql://ml_user:ml_password@db:5432/ml_community
+DATABASE_URL=postgresql://ml_admin:ML_Community_2024!@db:5432/ml_community
 POSTGRES_DB=ml_community
-POSTGRES_USER=ml_user
-POSTGRES_PASSWORD=ml_password
+POSTGRES_USER=ml_admin
+POSTGRES_PASSWORD=ML_Community_2024!
 
 # Redis
 REDIS_URL=redis://redis:6379
