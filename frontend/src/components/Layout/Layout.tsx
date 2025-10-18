@@ -1,6 +1,32 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, User, LogOut, Settings, BookOpen, Users, Newspaper } from 'lucide-react';
+import { 
+  Menu, 
+  X, 
+  Search, 
+  User, 
+  LogOut, 
+  Settings, 
+  BookOpen, 
+  Users, 
+  Newspaper,
+  FileText,
+  BarChart3,
+  Home,
+  UserPlus,
+  MessageSquare,
+  Award,
+  Target,
+  Zap,
+  Shield,
+  Sword,
+  Crown,
+  Gamepad2,
+  Calendar,
+  Video,
+  Image,
+  Download
+} from 'lucide-react';
 import { useAuth } from '@/services/auth';
 import SearchModal from '@/components/Search/SearchModal';
 
@@ -15,10 +41,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Главная', href: '/', icon: BookOpen },
+    { name: 'Главная', href: '/', icon: Home },
     { name: 'Герои', href: '/heroes', icon: Users },
     { name: 'Гайды', href: '/guides', icon: BookOpen },
     { name: 'Новости', href: '/news', icon: Newspaper },
+    { name: 'Поиск', href: '/search', icon: Search },
+  ];
+
+  const userNavigation = [
+    { name: 'Профиль', href: '/profile', icon: User },
+    { name: 'Мои гайды', href: '/profile/guides', icon: FileText },
+    { name: 'Статистика', href: '/profile/stats', icon: BarChart3 },
+    { name: 'Настройки', href: '/settings', icon: Settings },
+  ];
+
+  const communityLinks = [
+    { name: 'Discord', href: '#', icon: MessageSquare, external: true },
+    { name: 'Telegram', href: '#', icon: MessageSquare, external: true },
+    { name: 'YouTube', href: '#', icon: Video, external: true },
   ];
 
   const isActive = (path: string) => {
@@ -91,21 +131,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </button>
 
                   {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <Link
-                      to="/profile"
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <User className="w-4 h-4" />
-                      <span>Профиль</span>
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      <Settings className="w-4 h-4" />
-                      <span>Настройки</span>
-                    </Link>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    {userNavigation.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          <Icon className="w-4 h-4" />
+                          <span>{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                    <div className="border-t border-gray-100 my-1"></div>
                     <button
                       onClick={handleLogout}
                       className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
@@ -214,10 +254,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Навигация</h3>
               <ul className="space-y-2">
+                <li><Link to="/" className="text-gray-400 hover:text-white transition-colors duration-200">Главная</Link></li>
                 <li><Link to="/heroes" className="text-gray-400 hover:text-white transition-colors duration-200">Герои</Link></li>
                 <li><Link to="/guides" className="text-gray-400 hover:text-white transition-colors duration-200">Гайды</Link></li>
                 <li><Link to="/news" className="text-gray-400 hover:text-white transition-colors duration-200">Новости</Link></li>
                 <li><Link to="/search" className="text-gray-400 hover:text-white transition-colors duration-200">Поиск</Link></li>
+                <li><Link to="/guides/builder" className="text-gray-400 hover:text-white transition-colors duration-200">Конструктор гайдов</Link></li>
               </ul>
             </div>
             
@@ -228,6 +270,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <li><Link to="/login" className="text-gray-400 hover:text-white transition-colors duration-200">Вход</Link></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Discord</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Telegram</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">YouTube</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Помощь</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">FAQ</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Поддержка</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Обратная связь</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">API</a></li>
               </ul>
             </div>
           </div>
