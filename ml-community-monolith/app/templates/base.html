@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ML Community Platform{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">ML</span>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900">ML Community</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                        Главная
+                    </a>
+                    <a href="/heroes" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                        Герои
+                    </a>
+                    <a href="/guides" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                        Гайды
+                    </a>
+                    <a href="/news" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                        Новости
+                    </a>
+                    <a href="/search" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                        Поиск
+                    </a>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    {% if request.cookies.get("access_token") %}
+                        <a href="/profile" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                            Профиль
+                        </a>
+                        <a href="/logout" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                            Выйти
+                        </a>
+                    {% else %}
+                        <a href="/login" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                            Войти
+                        </a>
+                        <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                            Регистрация
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">ML</span>
+                        </div>
+                        <span class="text-xl font-bold">ML Community</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Фан-сообщество Mobile Legends: Bang Bang с системой управления героями, 
+                        гайдами, сборками и тактиками.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Навигация</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-gray-400 hover:text-white transition-colors duration-200">Главная</a></li>
+                        <li><a href="/heroes" class="text-gray-400 hover:text-white transition-colors duration-200">Герои</a></li>
+                        <li><a href="/guides" class="text-gray-400 hover:text-white transition-colors duration-200">Гайды</a></li>
+                        <li><a href="/news" class="text-gray-400 hover:text-white transition-colors duration-200">Новости</a></li>
+                        <li><a href="/search" class="text-gray-400 hover:text-white transition-colors duration-200">Поиск</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Сообщество</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/register" class="text-gray-400 hover:text-white transition-colors duration-200">Регистрация</a></li>
+                        <li><a href="/login" class="text-gray-400 hover:text-white transition-colors duration-200">Вход</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-200">Discord</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-200">Telegram</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 ML Community Platform. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

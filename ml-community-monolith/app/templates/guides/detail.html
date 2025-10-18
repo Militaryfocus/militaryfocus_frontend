@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}{{ guide.title }} - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Guide Header -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-green-600 to-blue-600 p-8 text-white">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="flex-shrink-0 mb-6 md:mb-0 md:mr-8">
+                    {% if guide.hero.icon_url %}
+                    <img src="{{ guide.hero.icon_url }}" alt="{{ guide.hero.name }}" class="w-24 h-24 rounded-lg">
+                    {% else %}
+                    <div class="w-24 h-24 bg-white/20 rounded-lg flex items-center justify-center">
+                        <i data-lucide="user" class="w-12 h-12 text-white/60"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h1 class="text-3xl font-bold mb-2">{{ guide.title }}</h1>
+                    <p class="text-lg text-green-100 mb-4">Гайд для {{ guide.hero.name }}</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ guide.hero.role }}</span>
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ guide.hero.specialty }}</span>
+                        {% if guide.battle_spell %}
+                        <span class="px-3 py-1 bg-white/20 rounded-full text-sm">{{ guide.battle_spell }}</span>
+                        {% endif %}
+                    </div>
+                    {% if guide.description %}
+                    <p class="text-green-100 max-w-2xl">{{ guide.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="eye" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ guide.views }}</h3>
+            <p class="text-gray-600">Просмотров</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="star" class="w-6 h-6 text-yellow-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ guide.rating|round(1) }}</h3>
+            <p class="text-gray-600">Рейтинг</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="thumbs-up" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ guide.likes }}</h3>
+            <p class="text-gray-600">Лайков</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="users" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ guide.rating_count }}</h3>
+            <p class="text-gray-600">Оценок</p>
+        </div>
+    </div>
+
+    <!-- Build Configuration -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Items Build -->
+        {% if items_data %}
+        <div class="bg-white rounded-lg p-6 shadow-md">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i data-lucide="package" class="w-5 h-5 mr-2 text-green-600"></i>
+                Сборка предметов
+            </h2>
+            <div class="grid grid-cols-3 gap-4">
+                {% for item in items_data %}
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mb-2">
+                        <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-900">{{ item.name or 'Предмет' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Emblem Configuration -->
+        {% if emblem_data %}
+        <div class="bg-white rounded-lg p-6 shadow-md">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i data-lucide="award" class="w-5 h-5 mr-2 text-purple-600"></i>
+                Настройка эмблима
+            </h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Тип эмблима</span>
+                    <span class="font-semibold">{{ emblem_data.type or 'Не указан' }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Уровень</span>
+                    <span class="font-semibold">{{ emblem_data.level or 'Не указан' }}</span>
+                </div>
+                {% if emblem_data.talents %}
+                <div>
+                    <span class="text-gray-600 block mb-2">Таланты:</span>
+                    <div class="flex flex-wrap gap-2">
+                        {% for talent in emblem_data.talents %}
+                        <span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">{{ talent }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Battle Spell -->
+    {% if guide.battle_spell %}
+    <div class="bg-white rounded-lg p-6 shadow-md">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <i data-lucide="zap" class="w-5 h-5 mr-2 text-yellow-600"></i>
+            Боевое заклинание
+        </h2>
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <i data-lucide="zap" class="w-8 h-8 text-yellow-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ guide.battle_spell }}</h3>
+                <p class="text-gray-600">Рекомендуемое боевое заклинание</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Guide Content -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">Описание гайда</h2>
+        <div class="prose max-w-none">
+            {% if guide.description %}
+            <p class="text-gray-700 leading-relaxed">{{ guide.description }}</p>
+            {% else %}
+            <p class="text-gray-500 italic">Описание гайда не предоставлено автором.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    {% if comments %}
+    <div class="bg-white rounded-lg p-6 shadow-md">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+            <i data-lucide="message-square" class="w-5 h-5 mr-2 text-blue-600"></i>
+            Комментарии ({{ comments|length }})
+        </h2>
+        
+        <div class="space-y-6">
+            {% for comment in comments %}
+            <div class="border-l-4 border-blue-200 pl-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <span class="font-medium text-gray-900">Пользователь</span>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ comment.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </div>
+                <p class="text-gray-700">{{ comment.content }}</p>
+                <div class="flex items-center space-x-4 mt-2">
+                    <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-600 transition-colors duration-200">
+                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                        <span class="text-sm">{{ comment.likes }}</span>
+                    </button>
+                    <button class="text-gray-500 hover:text-blue-600 transition-colors duration-200">
+                        <i data-lucide="reply" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                Лайкнуть гайд
+            </button>
+            <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                <i data-lucide="star" class="w-4 h-4"></i>
+                Оценить гайд
+            </button>
+            <button class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2">
+                <i data-lucide="share" class="w-4 h-4"></i>
+                Поделиться
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
