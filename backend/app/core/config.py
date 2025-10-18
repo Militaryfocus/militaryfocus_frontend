@@ -4,14 +4,19 @@ from pydantic import field_validator, Field
 import os
 
 class Settings(BaseSettings):
-    # Database
-    DATABASE_URL: str = "postgresql://ml_user:ml_password@db:5432/ml_community"
+    # Database Configuration
+    # Database: ml_community
+    # User: ml_admin
+    # Password: ML_Community_2024!
+    # Host: localhost (development) / db (docker)
+    DATABASE_URL: str = "postgresql://ml_admin:ML_Community_2024!@localhost:5432/ml_community"
     
-    # Redis
-    REDIS_URL: str = "redis://redis:6379"
+    # Redis Configuration
+    # Host: localhost (development) / redis (docker)
+    REDIS_URL: str = "redis://localhost:6379"
     
-    # Security
-    SECRET_KEY: str = Field(default="your-secret-key-change-in-production", min_length=32)
+    # Security Configuration
+    SECRET_KEY: str = Field(default="ML_Community_Super_Secret_Key_2024_Change_In_Production_At_Least_32_Chars", min_length=32)
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, ge=1, le=1440)
     
@@ -52,6 +57,12 @@ class Settings(BaseSettings):
     # External APIs
     ML_OFFICIAL_API_URL: str = "https://api.mobilelegends.com"
     ML_OFFICIAL_API_KEY: str = ""
+    
+    # Database Connection Pool Settings
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT: int = 30
+    DB_POOL_RECYCLE: int = 3600
     
     # Environment
     ENVIRONMENT: str = "development"
