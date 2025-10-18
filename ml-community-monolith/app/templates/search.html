@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Search Header -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Поиск</h1>
+        <p class="text-gray-600 mb-8">Найдите героев, гайды, новости и многое другое</p>
+        
+        <!-- Search Form -->
+        <form method="get" class="max-w-2xl mx-auto">
+            <div class="relative">
+                <input type="text" name="q" value="{{ query or '' }}" 
+                       placeholder="Введите поисковый запрос..."
+                       class="w-full px-6 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit" class="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if query %}
+    <!-- Search Results -->
+    <div class="space-y-8">
+        <!-- Heroes Results -->
+        {% if results.heroes %}
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i data-lucide="users" class="w-6 h-6 mr-2 text-blue-600"></i>
+                    Герои ({{ results.heroes|length }})
+                </h2>
+                <a href="/heroes?search={{ query }}" class="text-blue-600 hover:text-blue-700 font-medium">
+                    Показать все
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for hero in results.heroes %}
+                <div class="search-result">
+                    <div class="text-center">
+                        {% if hero.icon_url %}
+                        <img src="{{ hero.icon_url }}" alt="{{ hero.name }}" class="w-16 h-16 mx-auto mb-3 rounded-lg">
+                        {% else %}
+                        <div class="w-16 h-16 mx-auto mb-3 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <h3 class="font-semibold text-gray-900 mb-1">{{ hero.name }}</h3>
+                        <p class="text-sm text-gray-600 mb-2">{{ hero.title }}</p>
+                        
+                        <div class="flex justify-center space-x-2 mb-3">
+                            <span class="badge badge-blue">{{ hero.role }}</span>
+                            <span class="badge badge-green">{{ hero.specialty }}</span>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-4 text-xs text-gray-500 mb-3">
+                            <span>{{ hero.win_rate }}% WR</span>
+                            <span>{{ hero.pick_rate }}% PR</span>
+                        </div>
+                        
+                        <a href="/heroes/{{ hero.id }}" class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg font-medium transition-colors duration-200">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Guides Results -->
+        {% if results.guides %}
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i data-lucide="book-open" class="w-6 h-6 mr-2 text-green-600"></i>
+                    Гайды ({{ results.guides|length }})
+                </h2>
+                <a href="/guides?search={{ query }}" class="text-green-600 hover:text-green-700 font-medium">
+                    Показать все
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for guide in results.guides %}
+                <div class="search-result">
+                    <h3 class="font-semibold text-gray-900 mb-2">{{ guide.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-4">{{ guide.description[:100] }}...</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <div class="flex items-center space-x-4">
+                            <span class="flex items-center">
+                                <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                                {{ guide.views }}
+                            </span>
+                            <span class="flex items-center">
+                                <i data-lucide="star" class="w-4 h-4 mr-1"></i>
+                                {{ guide.rating|round(1) }}
+                            </span>
+                        </div>
+                        <span class="text-xs">{{ guide.created_at.strftime('%d.%m.%Y') }}</span>
+                    </div>
+                    
+                    <a href="/guides/{{ guide.id }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg font-medium transition-colors duration-200">
+                        Читать гайд
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- News Results -->
+        {% if results.news %}
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i data-lucide="newspaper" class="w-6 h-6 mr-2 text-purple-600"></i>
+                    Новости ({{ results.news|length }})
+                </h2>
+                <a href="/news?search={{ query }}" class="text-purple-600 hover:text-purple-700 font-medium">
+                    Показать все
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for news in results.news %}
+                <div class="search-result">
+                    {% if news.image_url %}
+                    <img src="{{ news.image_url }}" alt="{{ news.title }}" class="w-full h-48 object-cover rounded-lg mb-4">
+                    {% endif %}
+                    
+                    <h3 class="font-semibold text-gray-900 mb-2">{{ news.title }}</h3>
+                    <p class="text-gray-600 text-sm mb-4">{{ news.summary or news.content[:100] }}...</p>
+                    
+                    <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <span class="flex items-center">
+                            <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                            {{ news.views }}
+                        </span>
+                        <span>{{ news.created_at.strftime('%d.%m.%Y') }}</span>
+                    </div>
+                    
+                    <a href="/news/{{ news.id }}" class="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center py-2 rounded-lg font-medium transition-colors duration-200">
+                        Читать новость
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- No Results -->
+        {% if not results.heroes and not results.guides and not results.news %}
+        <div class="text-center py-12">
+            <i data-lucide="search" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Ничего не найдено</h3>
+            <p class="text-gray-600 mb-4">
+                По запросу "{{ query }}" ничего не найдено. Попробуйте изменить поисковый запрос.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="/heroes" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Все герои
+                </a>
+                <a href="/guides" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Все гайды
+                </a>
+                <a href="/news" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Все новости
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <!-- Search Suggestions -->
+    <div class="max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="users" class="w-8 h-8 text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Поиск героев</h3>
+                <p class="text-gray-600 mb-4">Найдите героев по имени, роли или специализации</p>
+                <a href="/heroes" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Просмотреть героев
+                </a>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="book-open" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Поиск гайдов</h3>
+                <p class="text-gray-600 mb-4">Найдите гайды по названию или герою</p>
+                <a href="/guides" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Просмотреть гайды
+                </a>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="newspaper" class="w-8 h-8 text-purple-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Поиск новостей</h3>
+                <p class="text-gray-600 mb-4">Найдите новости по заголовку или содержанию</p>
+                <a href="/news" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Просмотреть новости
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,304 @@
+/* ML Community Platform - Custom Styles */
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Smooth transitions */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Custom button styles */
+.btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+}
+
+/* Card hover effects */
+.card-hover {
+    @apply hover:shadow-lg transition-shadow duration-300;
+}
+
+/* Hero card styles */
+.hero-card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
+}
+
+.hero-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Guide card styles */
+.guide-card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
+}
+
+.guide-card:hover {
+    transform: translateY(-2px);
+}
+
+/* News card styles */
+.news-card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
+}
+
+.news-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Loading animation */
+.loading {
+    @apply animate-pulse;
+}
+
+/* Fade in animation */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide in animation */
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Pulse animation for important elements */
+.pulse-important {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Custom form styles */
+.form-input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200;
+}
+
+.form-select {
+    @apply px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200;
+}
+
+.form-textarea {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 resize-vertical;
+}
+
+/* Badge styles */
+.badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-blue {
+    @apply bg-blue-100 text-blue-800;
+}
+
+.badge-green {
+    @apply bg-green-100 text-green-800;
+}
+
+.badge-red {
+    @apply bg-red-100 text-red-800;
+}
+
+.badge-yellow {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-purple {
+    @apply bg-purple-100 text-purple-800;
+}
+
+.badge-gray {
+    @apply bg-gray-100 text-gray-800;
+}
+
+/* Stats card styles */
+.stats-card {
+    @apply bg-white rounded-lg p-6 shadow-md text-center;
+}
+
+.stats-card:hover {
+    @apply shadow-lg;
+}
+
+/* Navigation styles */
+.nav-link {
+    @apply text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+
+.nav-link.active {
+    @apply text-blue-600 bg-blue-50;
+}
+
+/* Footer styles */
+.footer-link {
+    @apply text-gray-400 hover:text-white transition-colors duration-200;
+}
+
+/* Hero stats styles */
+.hero-stat {
+    @apply flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0;
+}
+
+.hero-stat-label {
+    @apply text-gray-600;
+}
+
+.hero-stat-value {
+    @apply font-semibold;
+}
+
+/* Guide rating stars */
+.rating-stars {
+    @apply flex space-x-1;
+}
+
+.rating-star {
+    @apply w-4 h-4;
+}
+
+.rating-star.filled {
+    @apply text-yellow-400;
+}
+
+.rating-star.empty {
+    @apply text-gray-300;
+}
+
+/* Comment styles */
+.comment {
+    @apply border-l-4 border-blue-200 pl-4 py-2;
+}
+
+.comment:hover {
+    @apply bg-gray-50;
+}
+
+/* Search result styles */
+.search-result {
+    @apply bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+.search-result:hover {
+    @apply shadow-md;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .hero-card:hover,
+    .guide-card:hover,
+    .news-card:hover {
+        transform: none;
+    }
+    
+    .stats-card {
+        @apply p-4;
+    }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+    /* Dark mode styles can be added here */
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-break {
+        page-break-before: always;
+    }
+}
+
+/* Accessibility improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus styles for better accessibility */
+.focus-visible:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .hero-card,
+    .guide-card,
+    .news-card {
+        @apply border-2 border-gray-300;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
