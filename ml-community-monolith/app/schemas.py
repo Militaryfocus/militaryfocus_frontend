@@ -213,6 +213,36 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+# Response schemas for API
+class UserResponse(User):
+    pass
+
+class HeroResponse(Hero):
+    pass
+
+class BuildGuideResponse(BuildGuide):
+    hero: Optional[Hero] = None
+    author: Optional[User] = None
+
+class CommentResponse(Comment):
+    author: Optional[User] = None
+
+class NewsResponse(News):
+    author: Optional[User] = None
+
+class GuideRatingCreate(BaseModel):
+    rating: int
+
+class GuideRatingResponse(BaseModel):
+    id: int
+    guide_id: int
+    user_id: int
+    rating: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 # Response schemas
 class Message(BaseModel):
     message: str

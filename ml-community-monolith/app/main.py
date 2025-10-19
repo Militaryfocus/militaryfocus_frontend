@@ -9,6 +9,7 @@ import os
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.routers import router
+from app.api import api_router
 
 # Create FastAPI app
 app = FastAPI(
@@ -42,6 +43,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Include routers
 app.include_router(router)
+app.include_router(api_router)
 
 # Health check endpoint
 @app.get("/health")
