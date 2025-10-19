@@ -140,6 +140,11 @@ print_step "10.5. Creating default achievements..."
 python create_achievements.py
 print_status "Default achievements created"
 
+# Step 10.6: Import heroes data
+print_step "10.6. Importing heroes data..."
+python import_heroes.py import
+print_status "Heroes data imported"
+
 # Step 11: Create admin user
 print_step "11. Creating admin user..."
 python create_admin.py
