@@ -27,13 +27,13 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+  app:
+    build: .
     environment:
       - DATABASE_URL=postgresql://ml_admin:ML_Community_2024!@db:5432/ml_community
       - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=production
+      - DEBUG=false
     ports:
       - "8000:8000"
     depends_on:
@@ -42,17 +42,9 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
+      - ./app/static/uploads:/app/app/static/uploads
+      - ./app/logs:/app/app/logs
+    restart: unless-stopped
 
 volumes:
   postgres_data:

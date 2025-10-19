@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Гайды - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Гайды и сборки</h1>
+            <p class="text-gray-600 mt-2">Изучайте лучшие стратегии и сборки от сообщества</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="/guides/builder" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Создать гайд
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg p-6 shadow-sm">
+        <form method="get" class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" name="search" placeholder="Поиск по названию гайда..." 
+                       value="{{ search or '' }}" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </div>
+            <div>
+                <select name="hero_id" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option value="">Все герои</option>
+                    {% for hero in heroes %}
+                    <option value="{{ hero.id }}" {% if hero.id == current_hero_id %}selected{% endif %}>{{ hero.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+                    Фильтровать
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Info -->
+    <div class="flex justify-between items-center">
+        <p class="text-gray-600">
+            Найдено {{ total }} гайдов
+            {% if search %}
+                по запросу "{{ search }}"
+            {% endif %}
+            {% if current_hero_id %}
+                для выбранного героя
+            {% endif %}
+        </p>
+        <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-500">Страница {{ page }} из {{ pages }}</span>
+        </div>
+    </div>
+
+    <!-- Guides Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for guide in guides %}
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ guide.title }}</h3>
+                        <p class="text-gray-600 text-sm mb-3">{{ guide.description[:120] }}{% if guide.description|length > 120 %}...{% endif %}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div class="flex items-center space-x-4">
+                        <span class="flex items-center">
+                            <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                            {{ guide.views }}
+                        </span>
+                        <span class="flex items-center">
+                            <i data-lucide="star" class="w-4 h-4 mr-1"></i>
+                            {{ guide.rating|round(1) }}
+                        </span>
+                        <span class="flex items-center">
+                            <i data-lucide="thumbs-up" class="w-4 h-4 mr-1"></i>
+                            {{ guide.likes }}
+                        </span>
+                    </div>
+                    <span class="text-xs text-gray-400">{{ guide.created_at.strftime('%d.%m.%Y') }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-3 h-3 text-blue-600"></i>
+                        </div>
+                        <span class="text-sm text-gray-600">Автор</span>
+                    </div>
+                    <div class="flex space-x-1">
+                        {% for i in range(5) %}
+                        <i data-lucide="star" class="w-4 h-4 {% if i < guide.rating %}text-yellow-400{% else %}text-gray-300{% endif %}"></i>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <a href="/guides/{{ guide.id }}" class="block w-full mt-4 bg-green-600 hover:bg-green-700 text-white text-center py-2 rounded-lg font-medium transition-colors duration-200">
+                    Читать гайд
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pages > 1 %}
+    <div class="flex justify-center">
+        <nav class="flex space-x-2">
+            {% if page > 1 %}
+            <a href="?page={{ page - 1 }}{% if search %}&search={{ search }}{% endif %}{% if current_hero_id %}&hero_id={{ current_hero_id }}{% endif %}" 
+               class="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </a>
+            {% endif %}
+            
+            {% for p in range(1, pages + 1) %}
+            {% if p == page %}
+            <span class="px-3 py-2 bg-green-600 text-white rounded-lg">{{ p }}</span>
+            {% elif p <= 3 or p > pages - 3 or (p >= page - 1 and p <= page + 1) %}
+            <a href="?page={{ p }}{% if search %}&search={{ search }}{% endif %}{% if current_hero_id %}&hero_id={{ current_hero_id }}{% endif %}" 
+               class="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg">{{ p }}</a>
+            {% elif p == 4 and page > 5 %}
+            <span class="px-3 py-2 text-gray-500">...</span>
+            {% elif p == pages - 3 and page < pages - 4 %}
+            <span class="px-3 py-2 text-gray-500">...</span>
+            {% endif %}
+            {% endfor %}
+            
+            {% if page < pages %}
+            <a href="?page={{ page + 1 }}{% if search %}&search={{ search }}{% endif %}{% if current_hero_id %}&hero_id={{ current_hero_id }}{% endif %}" 
+               class="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    <!-- Empty State -->
+    {% if not guides %}
+    <div class="text-center py-12">
+        <i data-lucide="book-open" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Гайды не найдены</h3>
+        <p class="text-gray-600 mb-4">
+            {% if search %}
+                По запросу "{{ search }}" гайды не найдены. Попробуйте изменить поисковый запрос.
+            {% else %}
+                В данный момент нет доступных гайдов.
+            {% endif %}
+        </p>
+        <div class="flex justify-center space-x-4">
+            {% if search %}
+            <a href="/guides" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                Показать все гайды
+            </a>
+            {% endif %}
+            <a href="/guides/builder" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+                Создать первый гайд
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
