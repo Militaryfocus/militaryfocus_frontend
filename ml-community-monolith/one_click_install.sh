@@ -62,6 +62,7 @@ sudo -u postgres psql -c "CREATE DATABASE ml_community;" 2>/dev/null || true
 sudo -u postgres psql -c "CREATE USER ml_admin WITH PASSWORD 'ML_Community_2024!';" 2>/dev/null || true
 sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ml_community TO ml_admin;" 2>/dev/null || true
 sudo -u postgres psql -d ml_community -c "GRANT ALL ON SCHEMA public TO ml_admin;" 2>/dev/null || true
+sudo -u postgres psql -d ml_community -c "GRANT CREATE ON SCHEMA public TO ml_admin;" 2>/dev/null || true
 sudo -u postgres psql -d ml_community -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ml_admin;" 2>/dev/null || true
 sudo -u postgres psql -d ml_community -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ml_admin;" 2>/dev/null || true
 print_status "Database configured"
