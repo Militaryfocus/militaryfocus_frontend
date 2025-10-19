@@ -135,6 +135,11 @@ alembic revision --autogenerate -m "Initial migration" 2>/dev/null || true
 alembic upgrade head
 print_status "Database migrations completed"
 
+# Step 10.5: Create default achievements
+print_step "10.5. Creating default achievements..."
+python create_achievements.py
+print_status "Default achievements created"
+
 # Step 11: Create admin user
 print_step "11. Creating admin user..."
 python create_admin.py

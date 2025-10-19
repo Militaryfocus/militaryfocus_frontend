@@ -10,9 +10,15 @@ import os
 
 from app.core.database import get_db
 from app.core.config import settings
-from app.models import User, Hero, Item, Emblem, BuildGuide, Comment, News
-from app.schemas import UserCreate, UserUpdate, HeroCreate, HeroUpdate, BuildGuideCreate, NewsCreate
+from app.models import User, Hero, Item, Emblem, BuildGuide, Comment, News, UserStatistic, UserFavorite, Achievement, Notification
+from app.schemas import UserCreate, UserUpdate, HeroCreate, HeroUpdate, BuildGuideCreate, NewsCreate, UserFavoriteCreate, NotificationCreate
 from app.auth import get_password_hash, authenticate_user, create_access_token, get_current_user, get_current_active_user
+
+# Helper function for admin users
+def get_current_admin_user(current_user: User = Depends(get_current_active_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    return current_user
 
 # Create router
 router = APIRouter()
@@ -321,10 +327,30 @@ async def profile(request: Request, current_user: User = Depends(get_current_act
     # Get user guides
     guides = db.query(BuildGuide).filter(BuildGuide.author_id == current_user.id).all()
     
+    # Get or create user statistics
+    stats = db.query(UserStatistic).filter(UserStatistic.user_id == current_user.id).first()
+    if not stats:
+        stats = UserStatistic(user_id=current_user.id)
+        db.add(stats)
+        db.commit()
+        db.refresh(stats)
+    
+    # Get favorites count
+    favorites_count = db.query(UserFavorite).filter(UserFavorite.user_id == current_user.id).count()
+    
+    # Get unread notifications count
+    notifications_count = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.is_read == False
+    ).count()
+    
     context = {
         "request": request,
         "user": current_user,
-        "guides": guides
+        "guides": guides,
+        "stats": stats,
+        "favorites_count": favorites_count,
+        "notifications_count": notifications_count
     }
     
     return templates.TemplateResponse("profile/index.html", context)
@@ -404,10 +430,17 @@ async def statistics(request: Request, db: Session = Depends(get_db)):
     total_heroes = db.query(Hero).count()
     total_guides = db.query(BuildGuide).filter(BuildGuide.is_public == True).count()
     total_news = db.query(News).filter(News.is_published == True).count()
+    total_users = db.query(User).count()
     
     # Calculate average win rate
     avg_win_rate = db.query(func.avg(Hero.win_rate)).scalar() or 0
     avg_pick_rate = db.query(func.avg(Hero.pick_rate)).scalar() or 0
+    
+    # Get top heroes by pick rate
+    top_heroes = db.query(Hero).order_by(desc(Hero.pick_rate)).limit(10).all()
+    
+    # Get most active users
+    most_active_users = db.query(User).join(UserStatistic).order_by(desc(UserStatistic.guides_created)).limit(10).all()
     
     context = {
         "request": request,
@@ -415,9 +448,144 @@ async def statistics(request: Request, db: Session = Depends(get_db)):
             "total_heroes": total_heroes,
             "total_guides": total_guides,
             "total_news": total_news,
+            "total_users": total_users,
             "avg_win_rate": round(avg_win_rate, 1),
             "avg_pick_rate": round(avg_pick_rate, 1)
-        }
+        },
+        "top_heroes": top_heroes,
+        "most_active_users": most_active_users
     }
     
     return templates.TemplateResponse("stats/index.html", context)
+
+# Favorites functionality
+@router.post("/api/favorites")
+async def add_favorite(favorite: UserFavoriteCreate, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Add item to favorites."""
+    # Check if already favorited
+    existing = db.query(UserFavorite).filter(
+        UserFavorite.user_id == current_user.id,
+        UserFavorite.favorite_type == favorite.favorite_type,
+        UserFavorite.favorite_id == favorite.favorite_id
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Already in favorites")
+    
+    # Add to favorites
+    user_favorite = UserFavorite(
+        user_id=current_user.id,
+        favorite_type=favorite.favorite_type,
+        favorite_id=favorite.favorite_id
+    )
+    db.add(user_favorite)
+    db.commit()
+    
+    return {"message": "Added to favorites"}
+
+@router.delete("/api/favorites/{favorite_type}/{favorite_id}")
+async def remove_favorite(favorite_type: str, favorite_id: int, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Remove item from favorites."""
+    favorite = db.query(UserFavorite).filter(
+        UserFavorite.user_id == current_user.id,
+        UserFavorite.favorite_type == favorite_type,
+        UserFavorite.favorite_id == favorite_id
+    ).first()
+    
+    if not favorite:
+        raise HTTPException(status_code=404, detail="Favorite not found")
+    
+    db.delete(favorite)
+    db.commit()
+    
+    return {"message": "Removed from favorites"}
+
+@router.get("/favorites", response_class=HTMLResponse)
+async def favorites_page(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """User favorites page."""
+    # Get user favorites
+    favorites = db.query(UserFavorite).filter(UserFavorite.user_id == current_user.id).all()
+    
+    # Separate heroes and guides
+    favorite_heroes = []
+    favorite_guides = []
+    
+    for fav in favorites:
+        if fav.favorite_type == "hero":
+            hero = db.query(Hero).filter(Hero.id == fav.favorite_id).first()
+            if hero:
+                favorite_heroes.append(hero)
+        elif fav.favorite_type == "guide":
+            guide = db.query(BuildGuide).filter(BuildGuide.id == fav.favorite_id).first()
+            if guide:
+                favorite_guides.append(guide)
+    
+    context = {
+        "request": request,
+        "favorite_heroes": favorite_heroes,
+        "favorite_guides": favorite_guides
+    }
+    
+    return templates.TemplateResponse("favorites.html", context)
+
+# Notifications
+@router.get("/notifications", response_class=HTMLResponse)
+async def notifications_page(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """User notifications page."""
+    # Get user notifications
+    notifications = db.query(Notification).filter(
+        Notification.user_id == current_user.id
+    ).order_by(desc(Notification.created_at)).limit(50).all()
+    
+    # Mark as read
+    for notification in notifications:
+        if not notification.is_read:
+            notification.is_read = True
+    db.commit()
+    
+    context = {
+        "request": request,
+        "notifications": notifications
+    }
+    
+    return templates.TemplateResponse("notifications.html", context)
+
+@router.get("/api/notifications/count")
+async def get_notifications_count(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """Get unread notifications count."""
+    count = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.is_read == False
+    ).count()
+    
+    return {"count": count}
+
+# Enhanced profile with statistics
+@router.get("/profile/stats", response_class=HTMLResponse)
+async def profile_stats(request: Request, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    """User profile statistics page."""
+    # Get or create user statistics
+    stats = db.query(UserStatistic).filter(UserStatistic.user_id == current_user.id).first()
+    if not stats:
+        stats = UserStatistic(user_id=current_user.id)
+        db.add(stats)
+        db.commit()
+        db.refresh(stats)
+    
+    # Get user achievements
+    user_achievements = []
+    if stats.achievements:
+        user_achievements = db.query(Achievement).filter(Achievement.id.in_(stats.achievements)).all()
+    
+    # Get available achievements
+    all_achievements = db.query(Achievement).filter(Achievement.is_active == True).all()
+    
+    context = {
+        "request": request,
+        "user": current_user,
+        "stats": stats,
+        "user_achievements": user_achievements,
+        "all_achievements": all_achievements
+    }
+    
+    return templates.TemplateResponse("profile/stats.html", context)

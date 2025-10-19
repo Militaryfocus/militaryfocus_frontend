@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, Float, ForeignKey, Table, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -34,6 +34,9 @@ class User(Base):
     guides = relationship("BuildGuide", back_populates="author")
     comments = relationship("Comment", back_populates="author")
     ratings = relationship("GuideRating", back_populates="user")
+    statistics = relationship("UserStatistic", back_populates="user", uselist=False)
+    favorites = relationship("UserFavorite")
+    notifications = relationship("Notification")
 
 class Hero(Base):
     __tablename__ = "heroes"
@@ -221,3 +224,82 @@ class News(Base):
     
     # Relationships
     author = relationship("User")
+
+# User Favorites
+class UserFavorite(Base):
+    __tablename__ = "user_favorites"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    favorite_type = Column(String(20), nullable=False)  # 'hero' or 'guide'
+    favorite_id = Column(Integer, nullable=False)  # hero_id or guide_id
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    user = relationship("User")
+
+# User Statistics
+class UserStatistic(Base):
+    __tablename__ = "user_statistics"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    
+    # Activity stats
+    guides_created = Column(Integer, default=0)
+    comments_posted = Column(Integer, default=0)
+    likes_given = Column(Integer, default=0)
+    likes_received = Column(Integer, default=0)
+    
+    # Engagement stats
+    total_views = Column(Integer, default=0)
+    total_ratings = Column(Integer, default=0)
+    average_rating = Column(Float, default=0.0)
+    
+    # Achievement data
+    achievements = Column(JSON, default=list)  # List of achievement IDs
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    user = relationship("User", back_populates="statistics")
+
+# Achievements
+class Achievement(Base):
+    __tablename__ = "achievements"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(Text, nullable=False)
+    icon = Column(String(100))  # Icon name/class
+    category = Column(String(50), nullable=False)  # 'guides', 'social', 'activity'
+    requirement = Column(JSON)  # Requirements to unlock
+    points = Column(Integer, default=0)  # Achievement points
+    
+    is_active = Column(Boolean, default=True)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+# User Notifications
+class Notification(Base):
+    __tablename__ = "notifications"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    title = Column(String(200), nullable=False)
+    message = Column(Text, nullable=False)
+    notification_type = Column(String(50), nullable=False)  # 'like', 'comment', 'achievement', 'system'
+    
+    # Optional reference to related object
+    reference_type = Column(String(20))  # 'guide', 'comment', 'achievement'
+    reference_id = Column(Integer)
+    
+    is_read = Column(Boolean, default=False)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    user = relationship("User")

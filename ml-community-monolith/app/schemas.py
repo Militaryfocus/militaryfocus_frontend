@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 # User schemas
@@ -253,3 +253,84 @@ class PaginatedResponse(BaseModel):
     page: int
     size: int
     pages: int
+
+# User Statistics schemas
+class UserStatisticBase(BaseModel):
+    guides_created: int = 0
+    comments_posted: int = 0
+    likes_given: int = 0
+    likes_received: int = 0
+    total_views: int = 0
+    total_ratings: int = 0
+    average_rating: float = 0.0
+    achievements: List[int] = []
+
+class UserStatistic(UserStatisticBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+# Favorites schemas
+class UserFavoriteCreate(BaseModel):
+    favorite_type: str  # 'hero' or 'guide'
+    favorite_id: int
+
+class UserFavorite(BaseModel):
+    id: int
+    user_id: int
+    favorite_type: str
+    favorite_id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Achievement schemas
+class AchievementBase(BaseModel):
+    name: str
+    description: str
+    icon: Optional[str] = None
+    category: str
+    requirement: Dict[str, Any]
+    points: int = 0
+
+class AchievementCreate(AchievementBase):
+    pass
+
+class Achievement(AchievementBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Notification schemas
+class NotificationBase(BaseModel):
+    title: str
+    message: str
+    notification_type: str
+    reference_type: Optional[str] = None
+    reference_id: Optional[int] = None
+
+class NotificationCreate(NotificationBase):
+    user_id: int
+
+class Notification(NotificationBase):
+    id: int
+    user_id: int
+    is_read: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Enhanced User Response
+class UserResponseWithStats(User):
+    statistics: Optional[UserStatistic] = None
+    favorites_count: Optional[int] = None
+    notifications_count: Optional[int] = None

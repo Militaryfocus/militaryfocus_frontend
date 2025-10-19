@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика профиля - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white p-8">
+        <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <span class="text-2xl font-bold">{{ user.username[0].upper() }}</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold">{{ user.username }}</h1>
+                <p class="text-blue-100">Статистика и достижения</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ stats.guides_created }}</h3>
+            <p class="text-gray-600">Создано гайдов</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="message-circle" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ stats.comments_posted }}</h3>
+            <p class="text-gray-600">Комментариев</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="heart" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ stats.likes_received }}</h3>
+            <p class="text-gray-600">Получено лайков</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-md text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="eye" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900">{{ stats.total_views }}</h3>
+            <p class="text-gray-600">Просмотров</p>
+        </div>
+    </div>
+
+    <!-- Rating and Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Rating Stats -->
+        <div class="bg-white rounded-lg p-6 shadow-md">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i data-lucide="star" class="w-6 h-6 mr-2 text-yellow-500"></i>
+                Рейтинг и оценки
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Средний рейтинг:</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl font-bold text-yellow-600">{{ "%.1f"|format(stats.average_rating) }}</span>
+                        <div class="flex text-yellow-400">
+                            {% for i in range(5) %}
+                                {% if i < stats.average_rating %}
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                {% else %}
+                                <i data-lucide="star" class="w-4 h-4"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Всего оценок:</span>
+                    <span class="font-semibold">{{ stats.total_ratings }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Дано лайков:</span>
+                    <span class="font-semibold">{{ stats.likes_given }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Chart Placeholder -->
+        <div class="bg-white rounded-lg p-6 shadow-md">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i data-lucide="trending-up" class="w-6 h-6 mr-2 text-green-500"></i>
+                Активность
+            </h2>
+            
+            <div class="text-center py-8 text-gray-500">
+                <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-4"></i>
+                <p>График активности</p>
+                <p class="text-sm">Будет добавлен в следующем обновлении</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Section -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <i data-lucide="award" class="w-6 h-6 mr-2 text-yellow-500"></i>
+            Достижения
+        </h2>
+
+        {% if user_achievements %}
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Полученные достижения ({{ user_achievements|length }})</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for achievement in user_achievements %}
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="{{ achievement.icon or 'award' }}" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900">{{ achievement.name }}</h4>
+                            <p class="text-sm text-gray-600">{{ achievement.description }}</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-xs text-yellow-600 font-medium">+{{ achievement.points }} очков</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Available Achievements -->
+        {% set available_achievements = all_achievements|reject('in', user_achievements)|list %}
+        {% if available_achievements %}
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Доступные достижения ({{ available_achievements|length }})</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for achievement in available_achievements %}
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 opacity-75">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                            <i data-lucide="{{ achievement.icon or 'award' }}" class="w-5 h-5 text-gray-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-700">{{ achievement.name }}</h4>
+                            <p class="text-sm text-gray-500">{{ achievement.description }}</p>
+                            <div class="flex items-center mt-1">
+                                <span class="text-xs text-gray-500">{{ achievement.points }} очков</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not all_achievements %}
+        <div class="text-center py-8 text-gray-500">
+            <i data-lucide="award" class="w-12 h-12 mx-auto mb-4"></i>
+            <p>Достижения пока не настроены</p>
+            <p class="text-sm">Система достижений будет активирована администратором</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex justify-center space-x-4">
+        <a href="/profile" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+            <i data-lucide="user" class="w-5 h-5 mr-2"></i>
+            Вернуться к профилю
+        </a>
+        <a href="/favorites" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center">
+            <i data-lucide="heart" class="w-5 h-5 mr-2"></i>
+            Избранное
+        </a>
+    </div>
+</div>
+{% endblock %}

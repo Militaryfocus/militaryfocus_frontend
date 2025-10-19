@@ -59,6 +59,15 @@
                 <!-- User Menu -->
                 <div class="flex items-center space-x-4">
                     {% if request.cookies.get("access_token") %}
+                        <a href="/favorites" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
+                            <i data-lucide="heart" class="w-4 h-4 mr-1"></i>
+                            Избранное
+                        </a>
+                        <a href="/notifications" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center relative" id="notifications-link">
+                            <i data-lucide="bell" class="w-4 h-4 mr-1"></i>
+                            Уведомления
+                            <span id="notifications-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"></span>
+                        </a>
                         <a href="/profile" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
                             Профиль
                         </a>
@@ -132,6 +141,88 @@
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
+        
+        // Check for unread notifications
+        {% if request.cookies.get("access_token") %}
+        async function checkNotifications() {
+            try {
+                const response = await fetch('/api/notifications/count');
+                if (response.ok) {
+                    const data = await response.json();
+                    const badge = document.getElementById('notifications-badge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count > 99 ? '99+' : data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking notifications:', error);
+            }
+        }
+        
+        // Check notifications on page load
+        checkNotifications();
+        
+        // Check notifications every 30 seconds
+        setInterval(checkNotifications, 30000);
+        {% endif %}
+        
+        // Favorite functionality
+        async function addToFavorites(type, id) {
+            try {
+                const response = await fetch('/api/favorites', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        favorite_type: type,
+                        favorite_id: id
+                    })
+                });
+                
+                if (response.ok) {
+                    // Update UI to show favorited state
+                    const button = document.querySelector(`[data-favorite="${type}-${id}"]`);
+                    if (button) {
+                        button.innerHTML = '<i data-lucide="heart" class="w-4 h-4 fill-current"></i>';
+                        button.classList.add('text-red-600');
+                        button.onclick = () => removeFromFavorites(type, id);
+                    }
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || 'Ошибка при добавлении в избранное');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при добавлении в избранное');
+            }
+        }
+        
+        async function removeFromFavorites(type, id) {
+            try {
+                const response = await fetch(`/api/favorites/${type}/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // Update UI to show unfavorited state
+                    const button = document.querySelector(`[data-favorite="${type}-${id}"]`);
+                    if (button) {
+                        button.innerHTML = '<i data-lucide="heart" class="w-4 h-4"></i>';
+                        button.classList.remove('text-red-600');
+                        button.onclick = () => addToFavorites(type, id);
+                    }
+                } else {
+                    alert('Ошибка при удалении из избранного');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при удалении из избранного');
+            }
+        }
     </script>
     
     {% block extra_scripts %}{% endblock %}
