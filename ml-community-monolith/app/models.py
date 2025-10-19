@@ -169,6 +169,32 @@ class GuideRating(Base):
     guide = relationship("BuildGuide", back_populates="ratings")
     user = relationship("User", back_populates="ratings")
 
+class GuideLike(Base):
+    __tablename__ = "guide_likes"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    guide_id = Column(Integer, ForeignKey("build_guides.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    guide = relationship("BuildGuide")
+    user = relationship("User")
+
+class CommentLike(Base):
+    __tablename__ = "comment_likes"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    comment_id = Column(Integer, ForeignKey("comments.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    comment = relationship("Comment")
+    user = relationship("User")
+
 class News(Base):
     __tablename__ = "news"
     

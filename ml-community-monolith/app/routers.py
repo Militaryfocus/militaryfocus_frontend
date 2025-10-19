@@ -361,3 +361,63 @@ async def search(request: Request, q: Optional[str] = None, db: Session = Depend
     }
     
     return templates.TemplateResponse("search.html", context)
+
+# Guide Builder page
+@router.get("/guides/builder", response_class=HTMLResponse)
+async def guide_builder(request: Request, current_user: User = Depends(get_current_active_user)):
+    """Guide builder page."""
+    return templates.TemplateResponse("guides/builder.html", {"request": request})
+
+# Admin panel
+@router.get("/admin", response_class=HTMLResponse)
+async def admin_panel(request: Request, current_user: User = Depends(get_current_admin_user), db: Session = Depends(get_db)):
+    """Admin panel page."""
+    # Get statistics
+    total_heroes = db.query(Hero).count()
+    total_guides = db.query(BuildGuide).count()
+    total_users = db.query(User).count()
+    total_news = db.query(News).count()
+    
+    # Get recent activity
+    recent_guides = db.query(BuildGuide).order_by(desc(BuildGuide.created_at)).limit(5).all()
+    recent_users = db.query(User).order_by(desc(User.created_at)).limit(5).all()
+    
+    context = {
+        "request": request,
+        "stats": {
+            "total_heroes": total_heroes,
+            "total_guides": total_guides,
+            "total_users": total_users,
+            "total_news": total_news
+        },
+        "recent_guides": recent_guides,
+        "recent_users": recent_users
+    }
+    
+    return templates.TemplateResponse("admin/dashboard.html", context)
+
+# Statistics page
+@router.get("/stats", response_class=HTMLResponse)
+async def statistics(request: Request, db: Session = Depends(get_db)):
+    """Statistics page."""
+    # Get overview stats
+    total_heroes = db.query(Hero).count()
+    total_guides = db.query(BuildGuide).filter(BuildGuide.is_public == True).count()
+    total_news = db.query(News).filter(News.is_published == True).count()
+    
+    # Calculate average win rate
+    avg_win_rate = db.query(func.avg(Hero.win_rate)).scalar() or 0
+    avg_pick_rate = db.query(func.avg(Hero.pick_rate)).scalar() or 0
+    
+    context = {
+        "request": request,
+        "stats": {
+            "total_heroes": total_heroes,
+            "total_guides": total_guides,
+            "total_news": total_news,
+            "avg_win_rate": round(avg_win_rate, 1),
+            "avg_pick_rate": round(avg_pick_rate, 1)
+        }
+    }
+    
+    return templates.TemplateResponse("stats/index.html", context)

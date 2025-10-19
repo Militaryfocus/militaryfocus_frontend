@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика - ML Community{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Статистика платформы</h1>
+            <p class="text-gray-600 mt-2">Аналитика и метрики ML Community Platform</p>
+        </div>
+
+        <!-- Overview Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900" id="total-heroes">{{ stats.total_heroes }}</h3>
+                        <p class="text-gray-600">Героев в базе</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i data-lucide="book-open" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900" id="total-guides">{{ stats.total_guides }}</h3>
+                        <p class="text-gray-600">Популярных гайдов</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i data-lucide="star" class="w-6 h-6 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900" id="avg-win-rate">{{ stats.avg_win_rate }}%</h3>
+                        <p class="text-gray-600">Средний винрейт</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-orange-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900" id="avg-pick-rate">{{ stats.avg_pick_rate }}%</h3>
+                        <p class="text-gray-600">Средний пикрейт</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Top Heroes Chart -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Топ героев по винрейту</h2>
+                    <select id="hero-sort-select" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="win_rate">Винрейт</option>
+                        <option value="pick_rate">Пикрейт</option>
+                        <option value="ban_rate">Банрейт</option>
+                    </select>
+                </div>
+                
+                <div id="top-heroes-chart" class="space-y-3">
+                    <!-- Chart will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Popular Guides Chart -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Популярные гайды</h2>
+                    <a href="/guides" class="text-blue-600 hover:text-blue-700 text-sm font-medium">Все гайды</a>
+                </div>
+                
+                <div id="popular-guides-chart" class="space-y-3">
+                    <!-- Chart will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Statistics -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Hero Roles Distribution -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Распределение по ролям</h2>
+                <div id="roles-chart" class="space-y-3">
+                    <!-- Chart will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Guide Categories -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Категории гайдов</h2>
+                <div id="guide-categories-chart" class="space-y-3">
+                    <!-- Chart will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Активность за неделю</h2>
+                <div id="activity-timeline" class="space-y-3">
+                    <!-- Chart will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Stats -->
+        <div class="mt-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Статистика в реальном времени</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-blue-600" id="online-users">0</div>
+                    <p class="text-gray-600">Пользователей онлайн</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-600" id="today-guides">0</div>
+                    <p class="text-gray-600">Гайдов создано сегодня</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="today-views">0</div>
+                    <p class="text-gray-600">Просмотров сегодня</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class StatsDashboard {
+    constructor() {
+        this.init();
+    }
+    
+    async init() {
+        await this.loadStats();
+        this.setupEventListeners();
+        this.startRealTimeUpdates();
+    }
+    
+    async loadStats() {
+        try {
+            // Load overview stats
+            const statsResponse = await fetch('/api/v1/stats/overview');
+            const stats = await statsResponse.json();
+            
+            document.getElementById('total-heroes').textContent = stats.total_heroes;
+            document.getElementById('total-guides').textContent = stats.total_guides;
+            document.getElementById('avg-win-rate').textContent = stats.avg_win_rate + '%';
+            document.getElementById('avg-pick-rate').textContent = stats.avg_pick_rate + '%';
+            
+            // Load top heroes
+            await this.loadTopHeroes();
+            
+            // Load popular guides
+            await this.loadPopularGuides();
+            
+            // Load additional charts
+            await this.loadRolesChart();
+            await this.loadGuideCategoriesChart();
+            await this.loadActivityTimeline();
+            
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+    
+    async loadTopHeroes() {
+        try {
+            const response = await fetch('/api/v1/stats/heroes/top?limit=10');
+            const heroes = await response.json();
+            
+            const container = document.getElementById('top-heroes-chart');
+            container.innerHTML = heroes.map((hero, index) => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-sm font-bold text-blue-600">${index + 1}</span>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900">${hero.name}</h3>
+                            <p class="text-xs text-gray-500">${hero.role}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-bold text-gray-900">${hero.win_rate}%</div>
+                        <div class="text-xs text-gray-500">пикрейт: ${hero.pick_rate}%</div>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading top heroes:', error);
+        }
+    }
+    
+    async loadPopularGuides() {
+        try {
+            const response = await fetch('/api/v1/stats/guides/popular?limit=5');
+            const guides = await response.json();
+            
+            const container = document.getElementById('popular-guides-chart');
+            container.innerHTML = guides.map(guide => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                        <h3 class="text-sm font-medium text-gray-900">${guide.title}</h3>
+                        <p class="text-xs text-gray-500">${guide.hero_name} • ${guide.author_name}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm font-bold text-gray-900">${guide.views}</div>
+                        <div class="text-xs text-gray-500">просмотров</div>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading popular guides:', error);
+        }
+    }
+    
+    async loadRolesChart() {
+        // Mock data for roles distribution
+        const roles = [
+            { name: 'Tank', count: 15, percentage: 25 },
+            { name: 'Fighter', count: 20, percentage: 33 },
+            { name: 'Assassin', count: 12, percentage: 20 },
+            { name: 'Mage', count: 18, percentage: 30 },
+            { name: 'Marksman', count: 10, percentage: 17 },
+            { name: 'Support', count: 8, percentage: 13 }
+        ];
+        
+        const container = document.getElementById('roles-chart');
+        container.innerHTML = roles.map(role => `
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-700">${role.name}</span>
+                <div class="flex items-center">
+                    <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: ${role.percentage}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">${role.count}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    async loadGuideCategoriesChart() {
+        // Mock data for guide categories
+        const categories = [
+            { name: 'Сборки', count: 45, percentage: 40 },
+            { name: 'Стратегии', count: 30, percentage: 27 },
+            { name: 'Эмблимы', count: 20, percentage: 18 },
+            { name: 'Советы', count: 17, percentage: 15 }
+        ];
+        
+        const container = document.getElementById('guide-categories-chart');
+        container.innerHTML = categories.map(category => `
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-700">${category.name}</span>
+                <div class="flex items-center">
+                    <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="bg-green-600 h-2 rounded-full" style="width: ${category.percentage}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">${category.count}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    async loadActivityTimeline() {
+        // Mock data for activity timeline
+        const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+        const activity = [120, 150, 180, 200, 160, 140, 100];
+        
+        const container = document.getElementById('activity-timeline');
+        container.innerHTML = days.map((day, index) => `
+            <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-700">${day}</span>
+                <div class="flex items-center">
+                    <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="bg-purple-600 h-2 rounded-full" style="width: ${(activity[index] / 200) * 100}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">${activity[index]}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    setupEventListeners() {
+        // Hero sort select
+        document.getElementById('hero-sort-select').addEventListener('change', (e) => {
+            this.loadTopHeroes(e.target.value);
+        });
+    }
+    
+    startRealTimeUpdates() {
+        // Update real-time stats every 30 seconds
+        setInterval(() => {
+            this.updateRealTimeStats();
+        }, 30000);
+        
+        // Initial update
+        this.updateRealTimeStats();
+    }
+    
+    async updateRealTimeStats() {
+        // Mock real-time data
+        const onlineUsers = Math.floor(Math.random() * 50) + 20;
+        const todayGuides = Math.floor(Math.random() * 10) + 5;
+        const todayViews = Math.floor(Math.random() * 1000) + 500;
+        
+        document.getElementById('online-users').textContent = onlineUsers;
+        document.getElementById('today-guides').textContent = todayGuides;
+        document.getElementById('today-views').textContent = todayViews;
+    }
+}
+
+// Initialize dashboard when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new StatsDashboard();
+});
+
+// Initialize Lucide icons
+lucide.createIcons();
+</script>
+{% endblock %}

@@ -1,0 +1,532 @@
+{% extends "base.html" %}
+
+{% block title %}Конструктор гайдов - ML Community{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Конструктор гайдов</h1>
+            <p class="text-gray-600 mt-2">Создайте собственный гайд по герою с визуальным редактором</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Panel - Hero Selection & Build Configuration -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Hero Selection -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Выберите героя</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="hero-selection">
+                        <!-- Heroes will be loaded here -->
+                    </div>
+                    <div class="mt-4">
+                        <input type="text" id="hero-search" placeholder="Поиск героя..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Build Configuration -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200" id="build-config" style="display: none;">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Настройка сборки</h2>
+                    
+                    <!-- Items Selection -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Предметы</h3>
+                        <div class="grid grid-cols-6 gap-3" id="items-grid">
+                            <!-- Item slots will be generated here -->
+                        </div>
+                        <div class="mt-4">
+                            <input type="text" id="item-search" placeholder="Поиск предметов..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2" id="items-list">
+                            <!-- Items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Emblem Selection -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Эмблим</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Тип эмблима</label>
+                                <select id="emblem-type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Выберите тип</option>
+                                    <option value="physical">Физический</option>
+                                    <option value="magic">Магический</option>
+                                    <option value="tank">Танк</option>
+                                    <option value="jungle">Лес</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Уровень</label>
+                                <select id="emblem-level" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="1">Уровень 1</option>
+                                    <option value="2">Уровень 2</option>
+                                    <option value="3">Уровень 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2" id="emblems-list">
+                            <!-- Emblems will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Battle Spell -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">Боевое заклинание</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="battle-spells">
+                            <!-- Battle spells will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Guide Details & Preview -->
+            <div class="space-y-6">
+                <!-- Guide Details Form -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Детали гайда</h2>
+                    
+                    <form id="guide-form">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Название гайда</label>
+                                <input type="text" id="guide-title" name="title" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="Введите название гайда">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Описание</label>
+                                <textarea id="guide-description" name="description" rows="4"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Опишите стратегию и особенности сборки"></textarea>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" id="is-public" name="is_public" checked
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="is-public" class="ml-2 block text-sm text-gray-700">
+                                    Опубликовать гайд
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Build Preview -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200" id="build-preview" style="display: none;">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Предварительный просмотр</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Selected Hero -->
+                        <div id="preview-hero" class="text-center">
+                            <!-- Hero preview will be shown here -->
+                        </div>
+                        
+                        <!-- Selected Items -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Предметы</h3>
+                            <div class="grid grid-cols-6 gap-2" id="preview-items">
+                                <!-- Selected items will be shown here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Selected Emblem -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Эмблим</h3>
+                            <div id="preview-emblem" class="text-center">
+                                <!-- Selected emblem will be shown here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Selected Battle Spell -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Боевое заклинание</h3>
+                            <div id="preview-spell" class="text-center">
+                                <!-- Selected battle spell will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div class="space-y-3">
+                        <button id="save-draft" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                            Сохранить черновик
+                        </button>
+                        <button id="publish-guide" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                            Опубликовать гайд
+                        </button>
+                        <button id="preview-guide" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200">
+                            Предварительный просмотр
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Item/Emblem Selection Modal -->
+<div id="selection-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl max-w-4xl w-full max-h-96 overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900" id="modal-title">Выберите предмет</h3>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div id="modal-content" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <!-- Modal content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Guide Builder JavaScript
+class GuideBuilder {
+    constructor() {
+        this.selectedHero = null;
+        this.selectedItems = new Array(6).fill(null);
+        this.selectedEmblem = null;
+        this.selectedBattleSpell = null;
+        this.heroes = [];
+        this.items = [];
+        this.emblems = [];
+        this.battleSpells = [];
+        
+        this.init();
+    }
+    
+    async init() {
+        await this.loadData();
+        this.setupEventListeners();
+        this.renderHeroes();
+        this.renderBattleSpells();
+    }
+    
+    async loadData() {
+        try {
+            // Load heroes
+            const heroesResponse = await fetch('/api/v1/heroes?size=100');
+            this.heroes = await heroesResponse.json();
+            
+            // Load items (mock data for now)
+            this.items = [
+                { id: 1, name: 'Blade of Despair', category: 'Attack', image_url: '/static/images/items/blade_of_despair.png' },
+                { id: 2, name: 'Bloodlust Axe', category: 'Attack', image_url: '/static/images/items/bloodlust_axe.png' },
+                { id: 3, name: 'Demon Shoes', category: 'Movement', image_url: '/static/images/items/demon_shoes.png' },
+                { id: 4, name: 'Immortality', category: 'Defense', image_url: '/static/images/items/immortality.png' },
+                { id: 5, name: 'Lightning Truncheon', category: 'Magic', image_url: '/static/images/items/lightning_truncheon.png' },
+                { id: 6, name: 'Wind of Nature', category: 'Attack', image_url: '/static/images/items/wind_of_nature.png' }
+            ];
+            
+            // Load emblems (mock data for now)
+            this.emblems = [
+                { id: 1, name: 'Physical Emblem', category: 'physical', image_url: '/static/images/emblems/physical.png' },
+                { id: 2, name: 'Magic Emblem', category: 'magic', image_url: '/static/images/emblems/magic.png' },
+                { id: 3, name: 'Tank Emblem', category: 'tank', image_url: '/static/images/emblems/tank.png' },
+                { id: 4, name: 'Jungle Emblem', category: 'jungle', image_url: '/static/images/emblems/jungle.png' }
+            ];
+            
+            // Load battle spells (mock data for now)
+            this.battleSpells = [
+                { id: 1, name: 'Retribution', image_url: '/static/images/spells/retribution.png' },
+                { id: 2, name: 'Flicker', image_url: '/static/images/spells/flicker.png' },
+                { id: 3, name: 'Execute', image_url: '/static/images/spells/execute.png' },
+                { id: 4, name: 'Inspire', image_url: '/static/images/spells/inspire.png' },
+                { id: 5, name: 'Arrival', image_url: '/static/images/spells/arrival.png' },
+                { id: 6, name: 'Sprint', image_url: '/static/images/spells/sprint.png' }
+            ];
+        } catch (error) {
+            console.error('Error loading data:', error);
+        }
+    }
+    
+    setupEventListeners() {
+        // Hero search
+        document.getElementById('hero-search').addEventListener('input', (e) => {
+            this.filterHeroes(e.target.value);
+        });
+        
+        // Item search
+        document.getElementById('item-search').addEventListener('input', (e) => {
+            this.filterItems(e.target.value);
+        });
+        
+        // Emblem type change
+        document.getElementById('emblem-type').addEventListener('change', (e) => {
+            this.filterEmblems(e.target.value);
+        });
+        
+        // Form submission
+        document.getElementById('save-draft').addEventListener('click', () => {
+            this.saveGuide(false);
+        });
+        
+        document.getElementById('publish-guide').addEventListener('click', () => {
+            this.saveGuide(true);
+        });
+        
+        document.getElementById('preview-guide').addEventListener('click', () => {
+            this.previewGuide();
+        });
+        
+        // Modal close
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('selection-modal').classList.add('hidden');
+        });
+    }
+    
+    renderHeroes() {
+        const container = document.getElementById('hero-selection');
+        container.innerHTML = this.heroes.map(hero => `
+            <div class="hero-card cursor-pointer p-3 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200" 
+                 data-hero-id="${hero.id}">
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">${hero.name.charAt(0)}</span>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-900">${hero.name}</h3>
+                    <p class="text-xs text-gray-500">${hero.role}</p>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add click listeners
+        container.querySelectorAll('.hero-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const heroId = parseInt(card.dataset.heroId);
+                this.selectHero(heroId);
+            });
+        });
+    }
+    
+    selectHero(heroId) {
+        this.selectedHero = this.heroes.find(h => h.id === heroId);
+        
+        // Update UI
+        document.querySelectorAll('.hero-card').forEach(card => {
+            card.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        document.querySelector(`[data-hero-id="${heroId}"]`).classList.add('border-blue-500', 'bg-blue-50');
+        
+        // Show build configuration
+        document.getElementById('build-config').style.display = 'block';
+        this.renderItems();
+        this.renderEmblems();
+        this.updatePreview();
+    }
+    
+    renderItems() {
+        const container = document.getElementById('items-grid');
+        container.innerHTML = '';
+        
+        for (let i = 0; i < 6; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'item-slot w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-blue-500 transition-colors duration-200';
+            slot.innerHTML = this.selectedItems[i] ? 
+                `<img src="${this.selectedItems[i].image_url}" alt="${this.selectedItems[i].name}" class="w-full h-full object-cover rounded">` :
+                `<i data-lucide="plus" class="w-6 h-6 text-gray-400"></i>`;
+            
+            slot.addEventListener('click', () => this.openItemSelection(i));
+            container.appendChild(slot);
+        }
+        
+        // Render items list
+        this.renderItemsList();
+    }
+    
+    renderItemsList() {
+        const container = document.getElementById('items-list');
+        container.innerHTML = this.items.map(item => `
+            <div class="item-option cursor-pointer p-2 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200" 
+                 data-item-id="${item.id}">
+                <div class="text-center">
+                    <div class="w-12 h-12 mx-auto mb-1 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span class="text-xs">${item.name.charAt(0)}</span>
+                    </div>
+                    <p class="text-xs text-gray-700">${item.name}</p>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add click listeners
+        container.querySelectorAll('.item-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const itemId = parseInt(option.dataset.itemId);
+                const item = this.items.find(i => i.id === itemId);
+                // This would be handled by the item selection modal
+            });
+        });
+    }
+    
+    renderEmblems() {
+        const container = document.getElementById('emblems-list');
+        container.innerHTML = this.emblems.map(emblem => `
+            <div class="emblem-option cursor-pointer p-2 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200" 
+                 data-emblem-id="${emblem.id}">
+                <div class="text-center">
+                    <div class="w-12 h-12 mx-auto mb-1 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span class="text-xs">${emblem.name.charAt(0)}</span>
+                    </div>
+                    <p class="text-xs text-gray-700">${emblem.name}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    renderBattleSpells() {
+        const container = document.getElementById('battle-spells');
+        container.innerHTML = this.battleSpells.map(spell => `
+            <div class="spell-option cursor-pointer p-2 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200" 
+                 data-spell-id="${spell.id}">
+                <div class="text-center">
+                    <div class="w-12 h-12 mx-auto mb-1 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span class="text-xs">${spell.name.charAt(0)}</span>
+                    </div>
+                    <p class="text-xs text-gray-700">${spell.name}</p>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add click listeners
+        container.querySelectorAll('.spell-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const spellId = parseInt(option.dataset.spellId);
+                this.selectBattleSpell(spellId);
+            });
+        });
+    }
+    
+    selectBattleSpell(spellId) {
+        this.selectedBattleSpell = this.battleSpells.find(s => s.id === spellId);
+        
+        // Update UI
+        document.querySelectorAll('.spell-option').forEach(option => {
+            option.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        document.querySelector(`[data-spell-id="${spellId}"]`).classList.add('border-blue-500', 'bg-blue-50');
+        
+        this.updatePreview();
+    }
+    
+    openItemSelection(slotIndex) {
+        // This would open the modal for item selection
+        console.log('Opening item selection for slot:', slotIndex);
+    }
+    
+    filterHeroes(query) {
+        const filtered = this.heroes.filter(hero => 
+            hero.name.toLowerCase().includes(query.toLowerCase())
+        );
+        // Re-render heroes with filtered results
+        // Implementation would go here
+    }
+    
+    filterItems(query) {
+        const filtered = this.items.filter(item => 
+            item.name.toLowerCase().includes(query.toLowerCase())
+        );
+        // Re-render items with filtered results
+        // Implementation would go here
+    }
+    
+    filterEmblems(type) {
+        const filtered = this.emblems.filter(emblem => 
+            !type || emblem.category === type
+        );
+        // Re-render emblems with filtered results
+        // Implementation would go here
+    }
+    
+    updatePreview() {
+        if (!this.selectedHero) return;
+        
+        // Update hero preview
+        const heroPreview = document.getElementById('preview-hero');
+        heroPreview.innerHTML = `
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto mb-2 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <span class="text-3xl">${this.selectedHero.name.charAt(0)}</span>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">${this.selectedHero.name}</h3>
+                <p class="text-sm text-gray-500">${this.selectedHero.role}</p>
+            </div>
+        `;
+        
+        // Update items preview
+        const itemsPreview = document.getElementById('preview-items');
+        itemsPreview.innerHTML = this.selectedItems.map(item => `
+            <div class="w-12 h-12 border border-gray-300 rounded-lg flex items-center justify-center">
+                ${item ? `<img src="${item.image_url}" alt="${item.name}" class="w-full h-full object-cover rounded">` : 
+                         `<i data-lucide="plus" class="w-4 h-4 text-gray-400"></i>`}
+            </div>
+        `).join('');
+        
+        // Show preview
+        document.getElementById('build-preview').style.display = 'block';
+    }
+    
+    async saveGuide(isPublic) {
+        if (!this.selectedHero) {
+            alert('Пожалуйста, выберите героя');
+            return;
+        }
+        
+        const formData = {
+            title: document.getElementById('guide-title').value,
+            description: document.getElementById('guide-description').value,
+            hero_id: this.selectedHero.id,
+            items: JSON.stringify(this.selectedItems.filter(item => item !== null)),
+            emblem: this.selectedEmblem ? JSON.stringify(this.selectedEmblem) : null,
+            battle_spell: this.selectedBattleSpell ? this.selectedBattleSpell.name : null,
+            is_public: isPublic
+        };
+        
+        try {
+            const response = await fetch('/api/v1/guides', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                const guide = await response.json();
+                alert(isPublic ? 'Гайд опубликован!' : 'Черновик сохранен!');
+                window.location.href = `/guides/${guide.id}`;
+            } else {
+                const error = await response.json();
+                alert('Ошибка при сохранении гайда: ' + error.detail);
+            }
+        } catch (error) {
+            console.error('Error saving guide:', error);
+            alert('Ошибка при сохранении гайда');
+        }
+    }
+    
+    previewGuide() {
+        // This would open a preview modal or redirect to preview page
+        console.log('Preview guide');
+    }
+}
+
+// Initialize guide builder when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new GuideBuilder();
+});
+
+// Initialize Lucide icons
+lucide.createIcons();
+</script>
+{% endblock %}

@@ -5,7 +5,7 @@ from typing import Optional, List
 from datetime import datetime
 
 from app.core.database import get_db
-from app.models import User, Hero, Item, Emblem, BuildGuide, Comment, News, GuideRating
+from app.models import User, Hero, Item, Emblem, BuildGuide, Comment, News, GuideRating, GuideLike, CommentLike
 from app.schemas import (
     UserCreate, UserUpdate, UserResponse,
     HeroCreate, HeroUpdate, HeroResponse,
@@ -349,6 +349,76 @@ async def rate_guide(
             db.commit()
         
         return rating
+
+# ==================== LIKES API ====================
+
+@api_router.post("/guides/{guide_id}/like")
+async def like_guide(
+    guide_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Like or unlike a guide."""
+    guide = db.query(BuildGuide).filter(BuildGuide.id == guide_id).first()
+    if not guide:
+        raise HTTPException(status_code=404, detail="Guide not found")
+    
+    # Check if user already liked this guide
+    existing_like = db.query(GuideLike).filter(
+        GuideLike.guide_id == guide_id,
+        GuideLike.user_id == current_user.id
+    ).first()
+    
+    if existing_like:
+        # Unlike
+        db.delete(existing_like)
+        guide.likes -= 1
+        db.commit()
+        return {"message": "Guide unliked", "liked": False}
+    else:
+        # Like
+        like = GuideLike(
+            guide_id=guide_id,
+            user_id=current_user.id
+        )
+        db.add(like)
+        guide.likes += 1
+        db.commit()
+        return {"message": "Guide liked", "liked": True}
+
+@api_router.post("/comments/{comment_id}/like")
+async def like_comment(
+    comment_id: int,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Like or unlike a comment."""
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    
+    # Check if user already liked this comment
+    existing_like = db.query(CommentLike).filter(
+        CommentLike.comment_id == comment_id,
+        CommentLike.user_id == current_user.id
+    ).first()
+    
+    if existing_like:
+        # Unlike
+        db.delete(existing_like)
+        comment.likes -= 1
+        db.commit()
+        return {"message": "Comment unliked", "liked": False}
+    else:
+        # Like
+        like = CommentLike(
+            comment_id=comment_id,
+            user_id=current_user.id
+        )
+        db.add(like)
+        comment.likes += 1
+        db.commit()
+        return {"message": "Comment liked", "liked": True}
 
 # ==================== NEWS API ====================
 
