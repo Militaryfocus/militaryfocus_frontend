@@ -12,7 +12,7 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models import User, Hero, Item, Emblem, BuildGuide, Comment, News
 from app.schemas import UserCreate, UserUpdate, HeroCreate, HeroUpdate, BuildGuideCreate, NewsCreate
-from app.auth import get_password_hash, authenticate_user, create_access_token, get_current_user, get_current_active_user
+from app.auth import get_password_hash, authenticate_user, create_access_token, get_current_user, get_current_active_user, get_current_admin_user
 
 # Create router
 router = APIRouter()
