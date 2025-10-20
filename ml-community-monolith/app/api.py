@@ -14,7 +14,7 @@ from app.schemas import (
     CommentCreate, CommentResponse,
     GuideRatingCreate, GuideRatingResponse
 )
-from app.auth import get_current_active_user, get_current_admin_user
+from app.auth import get_current_active_user
 
 # Create API router
 api_router = APIRouter(prefix="/api/v1", tags=["API"])
