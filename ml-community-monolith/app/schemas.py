@@ -9,17 +9,54 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None
 
-class User(UserBase):
+class UserResponse(UserBase):
     id: int
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
     is_active: bool
     is_admin: bool
+    is_verified: bool
+    last_login: Optional[datetime] = None
     created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserRegister(UserCreate):
+    confirm_password: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class SessionInfo(BaseModel):
+    id: int
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    created_at: datetime
+    last_activity: datetime
+    is_active: bool
     
     class Config:
         from_attributes = True
