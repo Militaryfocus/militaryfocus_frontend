@@ -11,7 +11,7 @@ from app.models import User, UserSession
 from app.schemas import TokenData
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # JWT token scheme
 security = HTTPBearer()
