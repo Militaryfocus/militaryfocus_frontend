@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль - {{ user.username }} - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Profile Header -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-6 py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        {% if user.avatar_url %}
+                        <img class="h-20 w-20 rounded-full" src="{{ user.avatar_url }}" alt="{{ user.username }}">
+                        {% else %}
+                        <div class="h-20 w-20 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+                            <span class="text-white font-bold text-2xl">{{ user.username[0].upper() }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ user.username }}</h1>
+                        {% if user.first_name or user.last_name %}
+                        <p class="text-lg text-gray-600">{{ user.first_name }} {{ user.last_name }}</p>
+                        {% endif %}
+                        <p class="text-sm text-gray-500">{{ user.email }}</p>
+                        {% if user.bio %}
+                        <p class="mt-2 text-gray-700">{{ user.bio }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="/profile/edit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            Редактировать профиль
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white shadow rounded-lg p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="book-open" class="h-8 w-8 text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Гайды</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ guides|length }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white shadow rounded-lg p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="calendar" class="h-8 w-8 text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Дата регистрации</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ user.created_at.strftime('%d.%m.%Y') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white shadow rounded-lg p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="clock" class="h-8 w-8 text-purple-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Последний вход</p>
+                        <p class="text-2xl font-semibold text-gray-900">
+                            {% if user.last_login %}
+                                {{ user.last_login.strftime('%d.%m.%Y') }}
+                            {% else %}
+                                Никогда
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Безопасность</h3>
+                <div class="space-y-3">
+                    <a href="/profile/change-password" class="block w-full bg-yellow-50 text-yellow-800 px-4 py-2 rounded-md hover:bg-yellow-100 transition-colors">
+                        <i data-lucide="key" class="inline h-4 w-4 mr-2"></i>
+                        Изменить пароль
+                    </a>
+                    <a href="/profile/sessions" class="block w-full bg-blue-50 text-blue-800 px-4 py-2 rounded-md hover:bg-blue-100 transition-colors">
+                        <i data-lucide="monitor" class="inline h-4 w-4 mr-2"></i>
+                        Управление сессиями
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Активность</h3>
+                <div class="space-y-3">
+                    <a href="/guides/my" class="block w-full bg-green-50 text-green-800 px-4 py-2 rounded-md hover:bg-green-100 transition-colors">
+                        <i data-lucide="book-open" class="inline h-4 w-4 mr-2"></i>
+                        Мои гайды
+                    </a>
+                    <a href="/comments/my" class="block w-full bg-purple-50 text-purple-800 px-4 py-2 rounded-md hover:bg-purple-100 transition-colors">
+                        <i data-lucide="message-circle" class="inline h-4 w-4 mr-2"></i>
+                        Мои комментарии
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Guides -->
+        {% if guides %}
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Мои гайды</h3>
+            </div>
+            <div class="divide-y divide-gray-200">
+                {% for guide in guides %}
+                <div class="px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-medium text-gray-900 truncate">
+                                <a href="/guides/{{ guide.id }}" class="hover:text-blue-600">
+                                    {{ guide.title }}
+                                </a>
+                            </h4>
+                            <p class="text-sm text-gray-500">{{ guide.description[:100] }}...</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                                <span><i data-lucide="eye" class="inline h-4 w-4 mr-1"></i>{{ guide.views }}</span>
+                                <span><i data-lucide="heart" class="inline h-4 w-4 mr-1"></i>{{ guide.likes }}</span>
+                                <span><i data-lucide="star" class="inline h-4 w-4 mr-1"></i>{{ "%.1f"|format(guide.rating) }}</span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if guide.is_public %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {% if guide.is_public %}Опубликован{% else %}Черновик{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

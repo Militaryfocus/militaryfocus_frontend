@@ -58,13 +58,42 @@
 
                 <!-- User Menu -->
                 <div class="flex items-center space-x-4">
-                    {% if request.cookies.get("access_token") %}
-                        <a href="/profile" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Профиль
-                        </a>
-                        <a href="/logout" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                            Выйти
-                        </a>
+                    {% if user %}
+                        <!-- User Dropdown -->
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                                {% if user.avatar_url %}
+                                <img class="h-6 w-6 rounded-full" src="{{ user.avatar_url }}" alt="{{ user.username }}">
+                                {% else %}
+                                <div class="h-6 w-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+                                    <span class="text-white font-bold text-xs">{{ user.username[0].upper() }}</span>
+                                </div>
+                                {% endif %}
+                                <span>{{ user.username }}</span>
+                                <i data-lucide="chevron-down" class="h-4 w-4"></i>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i data-lucide="user" class="inline h-4 w-4 mr-2"></i>
+                                    Профиль
+                                </a>
+                                <a href="/profile/edit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i data-lucide="settings" class="inline h-4 w-4 mr-2"></i>
+                                    Настройки
+                                </a>
+                                <a href="/profile/sessions" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i data-lucide="monitor" class="inline h-4 w-4 mr-2"></i>
+                                    Сессии
+                                </a>
+                                <div class="border-t border-gray-100"></div>
+                                <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i data-lucide="log-out" class="inline h-4 w-4 mr-2"></i>
+                                    Выйти
+                                </a>
+                            </div>
+                        </div>
                     {% else %}
                         <a href="/login" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
                             Войти

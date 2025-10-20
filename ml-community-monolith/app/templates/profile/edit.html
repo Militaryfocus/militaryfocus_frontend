@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать профиль - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-gray-900">Редактировать профиль</h1>
+                <p class="mt-1 text-sm text-gray-600">Обновите информацию о своем профиле</p>
+            </div>
+            
+            <form method="post" class="px-6 py-6">
+                {% if error %}
+                <div class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                <div class="space-y-6">
+                    <!-- Basic Information -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Основная информация</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="first_name" class="block text-sm font-medium text-gray-700">
+                                    Имя
+                                </label>
+                                <input type="text" name="first_name" id="first_name" 
+                                       value="{{ user.first_name or '' }}"
+                                       class="mt-1 form-input">
+                            </div>
+                            
+                            <div>
+                                <label for="last_name" class="block text-sm font-medium text-gray-700">
+                                    Фамилия
+                                </label>
+                                <input type="text" name="last_name" id="last_name" 
+                                       value="{{ user.last_name or '' }}"
+                                       class="mt-1 form-input">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bio -->
+                    <div>
+                        <label for="bio" class="block text-sm font-medium text-gray-700">
+                            О себе
+                        </label>
+                        <textarea name="bio" id="bio" rows="4" 
+                                  class="mt-1 form-input"
+                                  placeholder="Расскажите о себе...">{{ user.bio or '' }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Краткое описание о себе (необязательно)</p>
+                    </div>
+                    
+                    <!-- Read-only information -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Информация об аккаунте</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Имя пользователя</label>
+                                <div class="mt-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900">
+                                    {{ user.username }}
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">Имя пользователя нельзя изменить</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                <div class="mt-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900">
+                                    {{ user.email }}
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">Email нельзя изменить</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="mt-8 flex items-center justify-between">
+                    <a href="/profile" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
+                        Отмена
+                    </a>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        Сохранить изменения
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

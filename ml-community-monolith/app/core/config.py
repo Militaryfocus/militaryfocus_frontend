@@ -5,7 +5,7 @@ import os
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql://ml_admin:ML_Community_2024!@localhost:5432/ml_community"
+    DATABASE_URL: str = "sqlite:///./ml_community.db"
     POSTGRES_DB: str = "ml_community"
     POSTGRES_USER: str = "ml_admin"
     POSTGRES_PASSWORD: str = "ML_Community_2024!"

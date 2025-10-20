@@ -15,7 +15,7 @@ from app.schemas import UserCreate, UserUpdate, HeroCreate, HeroUpdate, BuildGui
 from app.auth import (get_password_hash, authenticate_user, create_access_token, 
                      get_current_user, get_current_active_user, get_current_admin_user,
                      create_user_session, deactivate_session, get_user_sessions,
-                     get_current_user_from_cookie, get_current_user_optional)
+                     get_current_user_from_cookie, get_current_user_optional, verify_password)
 
 # Create router
 router = APIRouter()
@@ -23,10 +23,19 @@ router = APIRouter()
 # Templates
 templates = Jinja2Templates(directory="app/templates")
 
+# Template context processor for user info
+def get_template_context(request: Request, db: Session = Depends(get_db)):
+    """Get template context with user information."""
+    user = get_current_user_optional(request, db)
+    return {"request": request, "user": user}
+
 # Home page
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_db)):
     """Home page with stats and featured content."""
+    # Get user info
+    user = get_current_user_optional(request, db)
+    
     # Get stats
     total_heroes = db.query(Hero).count()
     total_guides = db.query(BuildGuide).filter(BuildGuide.is_public == True).count()
@@ -43,6 +52,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
     
     context = {
         "request": request,
+        "user": user,
         "total_heroes": total_heroes,
         "total_guides": total_guides,
         "total_news": total_news,
@@ -489,3 +499,145 @@ async def statistics(request: Request, db: Session = Depends(get_db)):
     }
     
     return templates.TemplateResponse("stats/index.html", context)
+
+# Profile management routes
+@router.get("/profile/edit", response_class=HTMLResponse)
+async def edit_profile_page(request: Request, db: Session = Depends(get_db)):
+    """Edit profile page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    return templates.TemplateResponse("profile/edit.html", {
+        "request": request,
+        "user": current_user
+    })
+
+@router.post("/profile/edit")
+async def update_profile(request: Request, 
+                        first_name: str = Form(None),
+                        last_name: str = Form(None),
+                        bio: str = Form(None),
+                        db: Session = Depends(get_db)):
+    """Update user profile."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    # Update user fields
+    if first_name is not None:
+        current_user.first_name = first_name
+    if last_name is not None:
+        current_user.last_name = last_name
+    if bio is not None:
+        current_user.bio = bio
+    
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    
+    return RedirectResponse(url="/profile", status_code=status.HTTP_302_FOUND)
+
+@router.get("/profile/sessions", response_class=HTMLResponse)
+async def profile_sessions(request: Request, db: Session = Depends(get_db)):
+    """User sessions management page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    sessions = get_user_sessions(db, current_user.id)
+    
+    return templates.TemplateResponse("profile/sessions.html", {
+        "request": request,
+        "user": current_user,
+        "sessions": sessions
+    })
+
+@router.post("/profile/sessions/{session_id}/revoke")
+async def revoke_session(request: Request, session_id: int, db: Session = Depends(get_db)):
+    """Revoke a specific session."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    session = db.query(UserSession).filter(
+        UserSession.id == session_id,
+        UserSession.user_id == current_user.id
+    ).first()
+    
+    if session:
+        session.is_active = False
+        db.commit()
+    
+    return RedirectResponse(url="/profile/sessions", status_code=status.HTTP_302_FOUND)
+
+@router.post("/profile/sessions/revoke-all")
+async def revoke_all_sessions(request: Request, db: Session = Depends(get_db)):
+    """Revoke all user sessions except current one."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    current_session_token = request.cookies.get("access_token")
+    
+    # Revoke all sessions except current one
+    db.query(UserSession).filter(
+        UserSession.user_id == current_user.id,
+        UserSession.session_token != current_session_token
+    ).update({"is_active": False})
+    db.commit()
+    
+    return RedirectResponse(url="/profile/sessions", status_code=status.HTTP_302_FOUND)
+
+# Password change
+@router.get("/profile/change-password", response_class=HTMLResponse)
+async def change_password_page(request: Request, db: Session = Depends(get_db)):
+    """Change password page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    return templates.TemplateResponse("profile/change-password.html", {
+        "request": request,
+        "user": current_user
+    })
+
+@router.post("/profile/change-password")
+async def change_password(request: Request,
+                         current_password: str = Form(...),
+                         new_password: str = Form(...),
+                         confirm_password: str = Form(...),
+                         db: Session = Depends(get_db)):
+    """Change user password."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    # Verify current password
+    if not verify_password(current_password, current_user.hashed_password):
+        return templates.TemplateResponse("profile/change-password.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Неверный текущий пароль"
+        })
+    
+    # Validate new password
+    if new_password != confirm_password:
+        return templates.TemplateResponse("profile/change-password.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Новые пароли не совпадают"
+        })
+    
+    if len(new_password) < 6:
+        return templates.TemplateResponse("profile/change-password.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Пароль должен содержать минимум 6 символов"
+        })
+    
+    # Update password
+    current_user.hashed_password = get_password_hash(new_password)
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    
+    return RedirectResponse(url="/profile", status_code=status.HTTP_302_FOUND)

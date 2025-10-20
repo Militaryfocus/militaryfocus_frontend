@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Управление сессиями - ML Community Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-gray-900">Управление сессиями</h1>
+                <p class="mt-1 text-sm text-gray-600">Управляйте активными сессиями вашего аккаунта</p>
+            </div>
+            
+            <div class="px-6 py-6">
+                <!-- Current Session Info -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i data-lucide="info" class="h-5 w-5 text-blue-600 mr-2"></i>
+                        <p class="text-sm text-blue-800">
+                            <strong>Текущая сессия:</strong> Эта страница открыта в текущей сессии. 
+                            Если вы завершите эту сессию, вам потребуется войти в систему заново.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Sessions List -->
+                {% if sessions %}
+                <div class="space-y-4">
+                    {% for session in sessions %}
+                    <div class="border border-gray-200 rounded-lg p-4 {% if loop.first %}bg-green-50 border-green-200{% endif %}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="monitor" class="h-5 w-5 text-gray-400"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-gray-900">
+                                            {% if session.user_agent %}
+                                                {{ session.user_agent.split(' ')[0] if session.user_agent else 'Неизвестное устройство' }}
+                                            {% else %}
+                                                Неизвестное устройство
+                                            {% endif %}
+                                        </h3>
+                                        <p class="text-sm text-gray-500">
+                                            {% if session.ip_address %}
+                                                IP: {{ session.ip_address }}
+                                            {% endif %}
+                                        </p>
+                                        <p class="text-xs text-gray-400">
+                                            Создана: {{ session.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                            | Последняя активность: {{ session.last_activity.strftime('%d.%m.%Y %H:%M') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                {% if loop.first %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Текущая сессия
+                                </span>
+                                {% else %}
+                                <form method="post" action="/profile/sessions/{{ session.id }}/revoke" class="inline">
+                                    <button type="submit" 
+                                            class="text-red-600 hover:text-red-800 text-sm font-medium"
+                                            onclick="return confirm('Вы уверены, что хотите завершить эту сессию?')">
+                                        Завершить сессию
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Bulk Actions -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900">Массовые действия</h3>
+                            <p class="text-sm text-gray-500">Завершить все сессии кроме текущей</p>
+                        </div>
+                        <form method="post" action="/profile/sessions/revoke-all" class="inline">
+                            <button type="submit" 
+                                    class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                                    onclick="return confirm('Вы уверены, что хотите завершить все остальные сессии? Это выйдет из всех других устройств.')">
+                                Завершить все остальные сессии
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                {% else %}
+                <div class="text-center py-8">
+                    <i data-lucide="monitor" class="h-12 w-12 text-gray-400 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Нет активных сессий</h3>
+                    <p class="text-gray-500">У вас нет активных сессий</p>
+                </div>
+                {% endif %}
+                
+                <!-- Back to Profile -->
+                <div class="mt-6">
+                    <a href="/profile" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        ← Вернуться к профилю
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

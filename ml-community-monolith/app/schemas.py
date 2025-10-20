@@ -251,21 +251,27 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 # Response schemas for API
-class UserResponse(User):
-    pass
+class UserResponse(UserBase):
+    id: int
+    is_active: bool
+    is_admin: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 class HeroResponse(Hero):
     pass
 
 class BuildGuideResponse(BuildGuide):
     hero: Optional[Hero] = None
-    author: Optional[User] = None
+    author: Optional[UserResponse] = None
 
 class CommentResponse(Comment):
-    author: Optional[User] = None
+    author: Optional[UserResponse] = None
 
 class NewsResponse(News):
-    author: Optional[User] = None
+    author: Optional[UserResponse] = None
 
 class GuideRatingCreate(BaseModel):
     rating: int
