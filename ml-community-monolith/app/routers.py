@@ -12,7 +12,10 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models import User, Hero, Item, Emblem, BuildGuide, Comment, News
 from app.schemas import UserCreate, UserUpdate, HeroCreate, HeroUpdate, BuildGuideCreate, NewsCreate
-from app.auth import get_password_hash, authenticate_user, create_access_token, get_current_user, get_current_active_user, get_current_admin_user
+from app.auth import (get_password_hash, authenticate_user, create_access_token, 
+                     get_current_user, get_current_active_user, get_current_admin_user,
+                     create_user_session, deactivate_session, get_user_sessions,
+                     get_current_user_from_cookie, get_current_user_optional, verify_password)
 
 # Create router
 router = APIRouter()
@@ -20,10 +23,19 @@ router = APIRouter()
 # Templates
 templates = Jinja2Templates(directory="app/templates")
 
+# Template context processor for user info
+def get_template_context(request: Request, db: Session = Depends(get_db)):
+    """Get template context with user information."""
+    user = get_current_user_optional(request, db)
+    return {"request": request, "user": user}
+
 # Home page
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, db: Session = Depends(get_db)):
     """Home page with stats and featured content."""
+    # Get user info
+    user = get_current_user_optional(request, db)
+    
     # Get stats
     total_heroes = db.query(Hero).count()
     total_guides = db.query(BuildGuide).filter(BuildGuide.is_public == True).count()
@@ -40,6 +52,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
     
     context = {
         "request": request,
+        "user": user,
         "total_heroes": total_heroes,
         "total_guides": total_guides,
         "total_news": total_news,
@@ -260,12 +273,35 @@ async def login(request: Request, username: str = Form(...), password: str = For
     if not user:
         return templates.TemplateResponse("auth/login.html", {
             "request": request,
-            "error": "Invalid username or password"
+            "error": "Неверное имя пользователя или пароль"
         })
     
+    if not user.is_active:
+        return templates.TemplateResponse("auth/login.html", {
+            "request": request,
+            "error": "Аккаунт заблокирован"
+        })
+    
+    # Create session
     access_token = create_access_token(data={"sub": user.username})
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    
+    create_user_session(db, user.id, access_token, ip_address, user_agent)
+    
+    # Update last login
+    user.last_login = datetime.utcnow()
+    db.commit()
+    
     response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    response.set_cookie(
+        key="access_token", 
+        value=access_token, 
+        httponly=True,
+        secure=True,  # Only over HTTPS in production
+        samesite="lax",
+        max_age=30 * 24 * 60 * 60  # 30 days
+    )
     return response
 
 @router.get("/register", response_class=HTMLResponse)
@@ -275,19 +311,35 @@ async def register_page(request: Request):
 
 @router.post("/register")
 async def register(request: Request, username: str = Form(...), email: str = Form(...),
-                  password: str = Form(...), db: Session = Depends(get_db)):
+                  password: str = Form(...), confirm_password: str = Form(...),
+                  first_name: str = Form(None), last_name: str = Form(None),
+                  db: Session = Depends(get_db)):
     """Register user."""
+    # Validate passwords match
+    if password != confirm_password:
+        return templates.TemplateResponse("auth/register.html", {
+            "request": request,
+            "error": "Пароли не совпадают"
+        })
+    
+    # Validate password strength
+    if len(password) < 6:
+        return templates.TemplateResponse("auth/register.html", {
+            "request": request,
+            "error": "Пароль должен содержать минимум 6 символов"
+        })
+    
     # Check if user exists
     if db.query(User).filter(User.username == username).first():
         return templates.TemplateResponse("auth/register.html", {
             "request": request,
-            "error": "Username already registered"
+            "error": "Пользователь с таким именем уже существует"
         })
     
     if db.query(User).filter(User.email == email).first():
         return templates.TemplateResponse("auth/register.html", {
             "request": request,
-            "error": "Email already registered"
+            "error": "Пользователь с таким email уже существует"
         })
     
     # Create user
@@ -295,36 +347,62 @@ async def register(request: Request, username: str = Form(...), email: str = For
     user = User(
         username=username,
         email=email,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        first_name=first_name,
+        last_name=last_name
     )
     db.add(user)
     db.commit()
+    db.refresh(user)
     
-    # Login user
+    # Create session and login user
     access_token = create_access_token(data={"sub": user.username})
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    
+    create_user_session(db, user.id, access_token, ip_address, user_agent)
+    
     response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
+    response.set_cookie(
+        key="access_token", 
+        value=access_token, 
+        httponly=True,
+        secure=True,  # Only over HTTPS in production
+        samesite="lax",
+        max_age=30 * 24 * 60 * 60  # 30 days
+    )
     return response
 
 @router.get("/logout")
-async def logout():
+async def logout(request: Request, db: Session = Depends(get_db)):
     """Logout user."""
+    session_token = request.cookies.get("access_token")
+    if session_token:
+        deactivate_session(db, session_token)
+    
     response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
     response.delete_cookie(key="access_token")
     return response
 
 # Profile page
 @router.get("/profile", response_class=HTMLResponse)
-async def profile(request: Request, current_user: User = Depends(get_current_active_user),
-                 db: Session = Depends(get_db)):
+async def profile(request: Request, db: Session = Depends(get_db)):
     """User profile page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
     # Get user guides
     guides = db.query(BuildGuide).filter(BuildGuide.author_id == current_user.id).all()
+    
+    # Get user sessions
+    sessions = get_user_sessions(db, current_user.id)
     
     context = {
         "request": request,
         "user": current_user,
-        "guides": guides
+        "guides": guides,
+        "sessions": sessions
     }
     
     return templates.TemplateResponse("profile/index.html", context)
@@ -421,3 +499,145 @@ async def statistics(request: Request, db: Session = Depends(get_db)):
     }
     
     return templates.TemplateResponse("stats/index.html", context)
+
+# Profile management routes
+@router.get("/profile/edit", response_class=HTMLResponse)
+async def edit_profile_page(request: Request, db: Session = Depends(get_db)):
+    """Edit profile page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    return templates.TemplateResponse("profile/edit.html", {
+        "request": request,
+        "user": current_user
+    })
+
+@router.post("/profile/edit")
+async def update_profile(request: Request, 
+                        first_name: str = Form(None),
+                        last_name: str = Form(None),
+                        bio: str = Form(None),
+                        db: Session = Depends(get_db)):
+    """Update user profile."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    # Update user fields
+    if first_name is not None:
+        current_user.first_name = first_name
+    if last_name is not None:
+        current_user.last_name = last_name
+    if bio is not None:
+        current_user.bio = bio
+    
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    
+    return RedirectResponse(url="/profile", status_code=status.HTTP_302_FOUND)
+
+@router.get("/profile/sessions", response_class=HTMLResponse)
+async def profile_sessions(request: Request, db: Session = Depends(get_db)):
+    """User sessions management page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    sessions = get_user_sessions(db, current_user.id)
+    
+    return templates.TemplateResponse("profile/sessions.html", {
+        "request": request,
+        "user": current_user,
+        "sessions": sessions
+    })
+
+@router.post("/profile/sessions/{session_id}/revoke")
+async def revoke_session(request: Request, session_id: int, db: Session = Depends(get_db)):
+    """Revoke a specific session."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    session = db.query(UserSession).filter(
+        UserSession.id == session_id,
+        UserSession.user_id == current_user.id
+    ).first()
+    
+    if session:
+        session.is_active = False
+        db.commit()
+    
+    return RedirectResponse(url="/profile/sessions", status_code=status.HTTP_302_FOUND)
+
+@router.post("/profile/sessions/revoke-all")
+async def revoke_all_sessions(request: Request, db: Session = Depends(get_db)):
+    """Revoke all user sessions except current one."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    current_session_token = request.cookies.get("access_token")
+    
+    # Revoke all sessions except current one
+    db.query(UserSession).filter(
+        UserSession.user_id == current_user.id,
+        UserSession.session_token != current_session_token
+    ).update({"is_active": False})
+    db.commit()
+    
+    return RedirectResponse(url="/profile/sessions", status_code=status.HTTP_302_FOUND)
+
+# Password change
+@router.get("/profile/change-password", response_class=HTMLResponse)
+async def change_password_page(request: Request, db: Session = Depends(get_db)):
+    """Change password page."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    return templates.TemplateResponse("profile/change-password.html", {
+        "request": request,
+        "user": current_user
+    })
+
+@router.post("/profile/change-password")
+async def change_password(request: Request,
+                         current_password: str = Form(...),
+                         new_password: str = Form(...),
+                         confirm_password: str = Form(...),
+                         db: Session = Depends(get_db)):
+    """Change user password."""
+    current_user = get_current_user_from_cookie(request, db)
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    
+    # Verify current password
+    if not verify_password(current_password, current_user.hashed_password):
+        return templates.TemplateResponse("profile/change-password.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Неверный текущий пароль"
+        })
+    
+    # Validate new password
+    if new_password != confirm_password:
+        return templates.TemplateResponse("profile/change-password.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Новые пароли не совпадают"
+        })
+    
+    if len(new_password) < 6:
+        return templates.TemplateResponse("profile/change-password.html", {
+            "request": request,
+            "user": current_user,
+            "error": "Пароль должен содержать минимум 6 символов"
+        })
+    
+    # Update password
+    current_user.hashed_password = get_password_hash(new_password)
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+    
+    return RedirectResponse(url="/profile", status_code=status.HTTP_302_FOUND)
