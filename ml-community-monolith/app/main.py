@@ -57,12 +57,7 @@ async def api_health():
     """API health check."""
     return {"status": "healthy", "api": "running"}
 
-# Root redirect to home
-@app.get("/", include_in_schema=False)
-async def root():
-    """Redirect root to home page."""
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/", status_code=200)
+# Root redirect to home (handled by router)
 
 if __name__ == "__main__":
     import uvicorn
