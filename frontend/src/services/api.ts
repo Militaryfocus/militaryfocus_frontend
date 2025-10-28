@@ -176,6 +176,22 @@ class ApiService {
     return response.data;
   }
 
+  async verifyUser(id: number): Promise<void> {
+    await this.api.post(`/users/${id}/verify`);
+  }
+
+  async deactivateUser(id: number): Promise<void> {
+    await this.api.post(`/users/${id}/deactivate`);
+  }
+
+  async activateUser(id: number): Promise<void> {
+    await this.api.post(`/users/${id}/activate`);
+  }
+
+  async changeUserRole(id: number, newRole: string): Promise<void> {
+    await this.api.post(`/users/${id}/change-role`, { new_role: newRole });
+  }
+
   // Auth API
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     const formData = new FormData();

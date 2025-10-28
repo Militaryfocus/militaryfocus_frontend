@@ -17,6 +17,8 @@ import RegisterPage from '@/pages/RegisterPage';
 import ProfilePage from '@/pages/ProfilePage';
 import SearchPage from '@/pages/SearchPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import AdminPanel from '@/pages/AdminPanel';
+import StatisticsPage from '@/pages/StatisticsPage';
 import './App.css';
 import './components/components.css';
 
@@ -66,6 +68,10 @@ function App() {
                 {/* Профиль */}
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/:id" element={<ProfilePage />} />
+                
+                {/* Admin */}
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/statistics" element={<StatisticsPage />} />
                 
                 {/* 404 */}
                 <Route path="*" element={<NotFoundPage />} />
